@@ -124,6 +124,135 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
         for (int i = windows.size() - 1; i >= 0; i--) {
             windows.get(i).render(drawContext, ticks, isFocused);
         }
+
+        // Render hover tooltips for chat text even when chat is not focused
+        renderHoverTooltip(drawContext);
+    }
+
+    private void renderHoverTooltip(DrawContext drawContext) {
+        if (client.currentScreen != null) {
+            // Don't render tooltips when a screen is open (unless it's the chat screen)
+            if (!(client.currentScreen instanceof io.github.darkkronicle.advancedchatcore.chat.AdvancedChatScreen)) {
+                return;
+            }
+        }
+
+        // Get mouse position
+        double mouseX = client.mouse.getX() * (double) client.getWindow().getScaledWidth() / (double) client.getWindow().getWidth();
+        double mouseY = client.mouse.getY() * (double) client.getWindow().getScaledHeight() / (double) client.getWindow().getHeight();
+
+        // Find the style at the mouse position
+        Style style = getTextIgnoreFocus(mouseX, mouseY);
+        if (style != null && style.getHoverEvent() != null) {
+            renderStyleHoverEffect(drawContext, style, (int) mouseX, (int) mouseY);
+        }
+    }
+
+    /**
+     * Render hover effect for a style (tooltip for text, item, entity, etc.)
+     * This properly handles all hover event types including formatted text, items, and entities
+     */
+    private void renderStyleHoverEffect(DrawContext drawContext, Style style, int x, int y) {
+        net.minecraft.text.HoverEvent hoverEvent = style.getHoverEvent();
+        if (hoverEvent == null) {
+            return;
+        }
+
+        // HoverEvent in 1.21 is a sealed interface with ShowText, ShowItem, and ShowEntity implementations
+        // We need to use reflection to access the obfuscated record component accessors
+        try {
+            // Look for comp_XXXX methods that return Text or ItemStack
+            for (java.lang.reflect.Method method : hoverEvent.getClass().getMethods()) {
+                if (method.getParameterCount() == 0 && method.getName().startsWith("comp_")) {
+                    Class<?> returnType = method.getReturnType();
+
+                    // Check if this returns Text (ShowText hover)
+                    if (net.minecraft.text.Text.class.isAssignableFrom(returnType)) {
+                        net.minecraft.text.Text text = (net.minecraft.text.Text) method.invoke(hoverEvent);
+                        if (text != null) {
+                            // Split text into lines and render with proper formatting
+                            java.util.List<net.minecraft.text.OrderedText> lines = splitFormattedTextIntoLines(text);
+                            drawContext.drawOrderedTooltip(client.textRenderer, lines, x, y);
+                        }
+                        return;
+                    }
+
+                    // Check if this returns ItemStack (ShowItem hover)
+                    if (net.minecraft.item.ItemStack.class.isAssignableFrom(returnType)) {
+                        net.minecraft.item.ItemStack itemStack = (net.minecraft.item.ItemStack) method.invoke(hoverEvent);
+                        if (itemStack != null) {
+                            drawContext.drawItemTooltip(client.textRenderer, itemStack, x, y);
+                        }
+                        return;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            AdvancedChatHud.LOGGER.error("[WindowManager] Failed to render hover tooltip: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Split formatted Text into lines while preserving all formatting (colors, bold, etc.)
+     */
+    private java.util.List<net.minecraft.text.OrderedText> splitFormattedTextIntoLines(net.minecraft.text.Text text) {
+        java.util.List<net.minecraft.text.OrderedText> result = new java.util.ArrayList<>();
+        java.util.List<net.minecraft.text.Text> textLines = new java.util.ArrayList<>();
+
+        // Recursively split the text by newlines while preserving formatting
+        splitTextRecursive(text, textLines, net.minecraft.text.Text.empty());
+
+        // Convert each Text line to OrderedText
+        for (net.minecraft.text.Text line : textLines) {
+            result.add(line.asOrderedText());
+        }
+
+        return result;
+    }
+
+    /**
+     * Recursively process Text and split by newlines while preserving all formatting
+     */
+    private void splitTextRecursive(net.minecraft.text.Text text, java.util.List<net.minecraft.text.Text> lines,
+                                     net.minecraft.text.MutableText currentLine) {
+        // Visit each text component
+        text.visit((style, str) -> {
+            if (str.contains("\n")) {
+                // Split by newlines
+                String[] parts = str.split("\n", -1);
+                for (int i = 0; i < parts.length; i++) {
+                    if (i > 0) {
+                        // Finish current line and start new one
+                        lines.add(currentLine.copy());
+                        currentLine.getSiblings().clear();
+                        currentLine.setStyle(net.minecraft.text.Style.EMPTY);
+                    }
+                    if (!parts[i].isEmpty()) {
+                        currentLine.append(net.minecraft.text.Text.literal(parts[i]).setStyle(style));
+                    }
+                }
+            } else {
+                currentLine.append(net.minecraft.text.Text.literal(str).setStyle(style));
+            }
+            return java.util.Optional.empty();
+        }, text.getStyle());
+
+        // Add the last line if it has content
+        if (!currentLine.getString().isEmpty() || lines.isEmpty()) {
+            lines.add(currentLine);
+        }
+    }
+
+    /**
+     * Get text at position without requiring chat to be focused
+     */
+    private Style getTextIgnoreFocus(double mouseX, double mouseY) {
+        for (ChatWindow w : windows) {
+            if (w.isMouseOver(mouseX, mouseY)) {
+                return w.getTextIgnoreFocus(mouseX, mouseY);
+            }
+        }
+        return null;
     }
 
     public void resetScroll() {
@@ -248,15 +377,22 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                 dragX = (int) mouseX - over.getConvertedX();
                 dragY = (int) mouseY - over.getConvertedY();
                 resize = false;
+                return true;
             } else if (over.isMouseOverResize(mouseX, mouseY)) {
                 drag = over;
                 dragX = (int) mouseX - over.getConvertedWidth();
                 dragY = (int) mouseY + over.getConvertedHeight();
                 resize = true;
+                return true;
             }
             Style style = over.getText(mouseX, mouseY);
+            AdvancedChatHud.LOGGER.info("[WindowManager] Checking for style at position (" + mouseX + ", " + mouseY + "), found: " + (style != null));
             // Handle text click - open URLs, run commands, etc.
             if (style != null) {
+                AdvancedChatHud.LOGGER.info("[WindowManager] Style has clickEvent: " + (style.getClickEvent() != null));
+                if (style.getClickEvent() != null) {
+                    AdvancedChatHud.LOGGER.info("[WindowManager] ClickEvent action: " + style.getClickEvent().getAction());
+                }
                 if (handleStyleClick(style, screen)) {
                     return true;
                 }
@@ -265,7 +401,8 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                 return true;
             }
         }
-        return true;
+        // Don't consume the click if nothing was handled - allow it to pass through
+        return false;
     }
 
     private boolean overVanillaHud(double mouseX, double mouseY) {
@@ -398,19 +535,136 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
 
     /**
      * Handle clicking on a style (for URLs, commands, etc.)
-     * Reimplements Screen.handleTextClick functionality for Minecraft 1.21+
-     *
-     * Note: Currently disabled due to API changes in Minecraft 1.21.11
-     * TODO: Re-implement when ClickEvent API is stable
+     * Reimplements Screen.handleTextClick functionality for Minecraft 1.21.11
      */
     private boolean handleStyleClick(Style style, Screen screen) {
         if (style == null) {
             return false;
         }
 
-        // TODO: ClickEvent API changed in Minecraft 1.21.11
-        // Need to find the correct way to access the click event value
-        // For now, text hover detection works but clicking is disabled
+        net.minecraft.text.ClickEvent clickEvent = style.getClickEvent();
+        if (clickEvent == null) {
+            return false;
+        }
+
+        // Use reflection to get the value since the API uses obfuscated method names in Minecraft 1.21.11
+        try {
+            net.minecraft.text.ClickEvent.Action action = clickEvent.getAction();
+
+            // Try to get the value - iterate through String-returning methods
+            String value = null;
+
+            // Try all methods with no parameters to find the value accessor
+            // For different actions, the value might be String (RUN_COMMAND) or URI (OPEN_URL)
+            for (java.lang.reflect.Method method : clickEvent.getClass().getMethods()) {
+                if (method.getParameterCount() == 0) {
+                    String methodName = method.getName();
+                    Class<?> returnType = method.getReturnType();
+
+                    // Look for comp_XXXX methods or methods with "value" in the name
+                    if (methodName.startsWith("comp_") || methodName.toLowerCase().contains("value")) {
+                        try {
+                            Object result = method.invoke(clickEvent);
+                            if (result != null) {
+                                // Convert to String based on the type
+                                if (result instanceof String) {
+                                    value = (String) result;
+                                } else if (result instanceof java.net.URI) {
+                                    value = result.toString();
+                                } else {
+                                    value = result.toString();
+                                }
+
+                                if (!value.isEmpty()) {
+                                    break;
+                                }
+                            }
+                        } catch (Exception ex) {
+                            // Continue trying other methods
+                        }
+                    }
+                }
+            }
+
+            if (value == null || value.isEmpty()) {
+                return false;
+            }
+
+            switch (action) {
+                case OPEN_URL:
+                    // Open URL in browser
+                    AdvancedChatHud.LOGGER.info("[WindowManager] OPEN_URL - value: " + value);
+                    try {
+                        java.net.URI uri = new java.net.URI(value);
+                        String scheme = uri.getScheme();
+                        if (scheme == null) {
+                            AdvancedChatHud.LOGGER.warn("[WindowManager] URL missing protocol: " + value);
+                            throw new java.net.URISyntaxException(value, "Missing protocol");
+                        }
+
+                        if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
+                            AdvancedChatHud.LOGGER.warn("[WindowManager] Blocked URL with unsupported protocol: " + scheme);
+                            throw new java.net.URISyntaxException(value, "Unsupported protocol: " + scheme);
+                        }
+
+                        // Use Minecraft's Util class to open URL safely
+                        AdvancedChatHud.LOGGER.info("[WindowManager] Opening URL: " + uri);
+                        net.minecraft.util.Util.getOperatingSystem().open(uri);
+                        return true;
+                    } catch (Exception e) {
+                        AdvancedChatHud.LOGGER.error("Failed to open URL: " + value, e);
+                    }
+                    break;
+
+                case OPEN_FILE:
+                    // Open file (usually disabled for security)
+                    try {
+                        java.net.URI uri = new java.net.URI(value);
+                        net.minecraft.util.Util.getOperatingSystem().open(uri);
+                        return true;
+                    } catch (Exception e) {
+                        AdvancedChatHud.LOGGER.error("Failed to open file: " + value, e);
+                    }
+                    break;
+
+                case RUN_COMMAND:
+                    // Run command (starts with /)
+                    AdvancedChatHud.LOGGER.info("[WindowManager] RUN_COMMAND - value: " + value + ", screen: " + (screen != null ? screen.getClass().getSimpleName() : "null"));
+                    if (client.player != null) {
+                        String command = value.startsWith("/") ? value.substring(1) : value;
+                        AdvancedChatHud.LOGGER.info("[WindowManager] Sending command: " + command);
+                        client.player.networkHandler.sendChatCommand(command);
+                        // Close the chat screen if it's open
+                        if (screen instanceof AdvancedChatScreen) {
+                            client.setScreen(null);
+                        }
+                    } else {
+                        AdvancedChatHud.LOGGER.warn("[WindowManager] Client player is null, cannot send command");
+                    }
+                    return true;
+
+                case SUGGEST_COMMAND:
+                    // Suggest command in chat field - open chat if not already open
+                    if (screen instanceof AdvancedChatScreen chatScreen) {
+                        chatScreen.getChatField().setText(value);
+                    } else {
+                        // Open chat screen with the suggested command
+                        client.setScreen(new AdvancedChatScreen(value));
+                    }
+                    return true;
+
+                case CHANGE_PAGE:
+                    // Page changes are handled by book screens, not chat
+                    return false;
+
+                case COPY_TO_CLIPBOARD:
+                    // Copy text to clipboard
+                    client.keyboard.setClipboard(value);
+                    return true;
+            }
+        } catch (Exception e) {
+            AdvancedChatHud.LOGGER.error("Failed to handle style click", e);
+        }
 
         return false;
     }

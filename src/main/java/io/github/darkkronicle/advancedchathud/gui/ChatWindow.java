@@ -695,6 +695,14 @@ public class ChatWindow {
         if (!WindowManager.getInstance().isChatFocused()) {
             return null;
         }
+        return getTextIgnoreFocus(mouseX, mouseY);
+    }
+
+    /**
+     * Get text at mouse position without requiring chat to be focused.
+     * Used for hover tooltips in HUD mode.
+     */
+    public Style getTextIgnoreFocus(double mouseX, double mouseY) {
         double relX = mouseX;
         double relY = getConvertedY() - mouseY;
         double trueX = relX / getScale() - getPaddedLeftX();

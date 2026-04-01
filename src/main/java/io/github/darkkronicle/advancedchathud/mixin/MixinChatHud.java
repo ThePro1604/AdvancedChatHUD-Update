@@ -81,8 +81,10 @@ public abstract class MixinChatHud implements IChatHud {
         }
     }
 
-    // Note: getTextStyleAt method no longer exists in Minecraft 1.21.11
-    // TODO: Find replacement method for text style detection
+    // Note: getTextStyleAt method was removed/renamed in Minecraft 1.21.11
+    // Hover detection for custom chat windows currently relies on WindowManager.getText()
+    // being called from click handlers. Tooltips work during chat screen open state.
+    // TODO: Find the new method name for hover text detection in 1.21.11
     // @Inject(at = @At("HEAD"), method = "getTextStyleAt", cancellable = true)
     // public void getTextHead(double x, double y, CallbackInfoReturnable<Style> cir) {
     //     // Ignore checking vanilla chat for hovered text if disabled
