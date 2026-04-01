@@ -82,7 +82,6 @@ public class SharingScreen extends GuiBase {
                 StringUtils.translate("advancedchat.gui.message.successful"));
     }
 
-    @Override
     public void resize(MinecraftClient mc, int width, int height) {
         this.width = width;
         this.height = height;

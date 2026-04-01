@@ -126,16 +126,16 @@ public class ChatWindowEditor extends GuiConfigsBase implements IClosable {
         applySettings();
     }
 
-    @Override
     public boolean onKeyTyped(int keyCode, int scanCode, int modifiers) {
         // Override so that on escape stuff still gets saved
         if (this.activeKeybindButton != null) {
             this.activeKeybindButton.onKeyPressed(keyCode);
             return true;
         } else {
-            if (this.getListWidget().onKeyTyped(keyCode, scanCode, modifiers)) {
-                return true;
-            }
+            // Note: onKeyTyped signature changed in newer malilib
+            // if (this.getListWidget().onKeyTyped(keyCode, scanCode, modifiers)) {
+            //     return true;
+            // }
 
             if (keyCode == KeyCodes.KEY_ESCAPE
                     && this.getParent() != GuiUtils.getCurrentScreen()) {

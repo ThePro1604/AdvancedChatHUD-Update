@@ -7,6 +7,7 @@
  */
 package io.github.darkkronicle.advancedchathud.gui;
 
+import fi.dy.masa.malilib.config.options.ConfigColor;
 import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.util.InfoUtils;
 import fi.dy.masa.malilib.util.StringUtils;
@@ -28,6 +29,7 @@ import io.github.darkkronicle.advancedchathud.tabs.CustomChatTab;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Style;
@@ -55,6 +57,9 @@ public class HudSection extends AdvancedChatScreenSection {
 
     private ChatMessage message = null;
 
+    private Text hoveredMenuEntry = null;
+    private LinkedHashMap<Text, ContextMenu.ContextConsumer> menuOptions = null;
+
     public HudSection(AdvancedChatScreen screen) {
         super(screen);
     }
@@ -63,7 +68,7 @@ public class HudSection extends AdvancedChatScreenSection {
         Color baseColor;
         ChatWindow sel = WindowManager.getInstance().getSelected();
         if (sel == null) {
-            baseColor = HudConfigStorage.MAIN_TAB.getInnerColor().config.get();
+            baseColor = new Color(StringUtils.getColor(HudConfigStorage.MAIN_TAB.getInnerColor().config.getStringValue(), 0xFFFFFFFF));
         } else {
             baseColor = sel.getTab().getInnerColor();
         }
@@ -72,15 +77,19 @@ public class HudSection extends AdvancedChatScreenSection {
 
     @Override
     public void initGui() {
+        AdvancedChatHud.LOGGER.info("[HudSection] initGui() called");
         boolean left = !HudConfigStorage.General.TAB_BUTTONS_ON_RIGHT.config.getBooleanValue();
         List<AbstractChatTab> tabs = new ArrayList<>(AdvancedChatHud.MAIN_CHAT_TAB.getAllChatTabs());
+        AdvancedChatHud.LOGGER.info("[HudSection] Found " + tabs.size() + " tabs to add as buttons");
         if (!left) {
             Collections.reverse(tabs);
         }
         RowList<ButtonBase> rows = left ? getScreen().getLeftSideButtons() : getScreen().getRightSideButtons();
         rows.createSection("tabs", 0);
         for (AbstractChatTab tab : tabs) {
-            rows.add("tabs", TabButton.fromTab(tab, 0, 0));
+            TabButton button = TabButton.fromTab(tab, 0, 0);
+            rows.add("tabs", button);
+            AdvancedChatHud.LOGGER.info("[HudSection] Added tab button: " + tab.getName() + " (UUID: " + tab.getUuid() + ")");
         }
         IconButton window = new IconButton(0, 0, 14, 32, ADD_ICON, (button) -> WindowManager.getInstance().onTabAddButton(IChatHud.getInstance().getTab()));
         IconButton reset = new IconButton(0, 0, 14, 32, RESET_ICON, (button) -> WindowManager.getInstance().reset());
@@ -91,6 +100,7 @@ public class HudSection extends AdvancedChatScreenSection {
             rows.add("tabs", window, 0);
             rows.add("tabs", reset, 0);
         }
+        AdvancedChatHud.LOGGER.info("[HudSection] initGui() complete - buttons added");
 
         if (getScreen().getChatField().getText().isEmpty()) {
             ChatWindow chatWindow = WindowManager.getInstance().getSelected();
@@ -108,7 +118,58 @@ public class HudSection extends AdvancedChatScreenSection {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
         if (menu != null) {
-            menu.render(context, mouseX, mouseY, true);
+            // Render context menu directly - replicate ContextMenu's render logic using DrawContext
+            renderContextMenuDirect(context, menu, mouseX, mouseY);
+        }
+    }
+
+    private void renderContextMenuDirect(DrawContext context, ContextMenu menu, int mouseX, int mouseY) {
+        // Get menu properties via reflection since we can't directly access them
+        try {
+            java.lang.reflect.Field bgField = ContextMenu.class.getDeclaredField("background");
+            bgField.setAccessible(true);
+            Color background = (Color) bgField.get(menu);
+
+            java.lang.reflect.Field hoverField = ContextMenu.class.getDeclaredField("hover");
+            hoverField.setAccessible(true);
+            Color hover = (Color) hoverField.get(menu);
+
+            java.lang.reflect.Field optionsField = ContextMenu.class.getDeclaredField("options");
+            optionsField.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            LinkedHashMap<Text, ContextMenu.ContextConsumer> options = (LinkedHashMap<Text, ContextMenu.ContextConsumer>) optionsField.get(menu);
+
+            // Store options for click handling
+            menuOptions = options;
+
+            int x = menu.getX();
+            int y = menu.getY();
+            int width = menu.getWidth();
+            int height = menu.getHeight();
+
+            MinecraftClient mc = MinecraftClient.getInstance();
+
+            // Draw background
+            context.fill(x, y, x + width, y + height, background.color());
+
+            int rX = x + 2;
+            int rY = y + 2;
+
+            // Reset hovered entry
+            hoveredMenuEntry = null;
+
+            // Draw each option
+            for (Text option : options.keySet()) {
+                if (mouseX >= x && mouseX <= x + width && mouseY >= rY - 2 && mouseY < rY + mc.textRenderer.fontHeight + 1) {
+                    // Draw hover highlight
+                    context.fill(rX - 2, rY - 2, rX - 2 + width, rY - 2 + mc.textRenderer.fontHeight + 2, hover.color());
+                    hoveredMenuEntry = option;
+                }
+                context.drawTextWithShadow(mc.textRenderer, option, rX, rY, -1);
+                rY += mc.textRenderer.fontHeight + 2;
+            }
+        } catch (Exception e) {
+            AdvancedChatHud.LOGGER.error("[HudSection] Failed to render context menu: " + e.getMessage());
         }
     }
 
@@ -129,7 +190,7 @@ public class HudSection extends AdvancedChatScreenSection {
                 if (message.getOwner().getEntry().getDisplayName() != null) {
                     data.append(message.getOwner().getEntry().getDisplayName());
                 } else {
-                    data.append(message.getOwner().getEntry().getProfile().getName());
+                    data.append(message.getOwner().getEntry().getProfile().name());
                 }
             }
             if (!data.build().getString().isBlank())  {
@@ -146,7 +207,7 @@ public class HudSection extends AdvancedChatScreenSection {
             });
             if (message.getOwner() != null) {
                 actions.put(Text.literal(StringUtils.translate("advancedchathud.context.messageowner")), (x, y) -> {
-                    getScreen().getChatField().setText("/msg " + message.getOwner().getEntry().getProfile().getName() + " ");
+                    getScreen().getChatField().setText("/msg " + message.getOwner().getEntry().getProfile().name() + " ");
                 });
             }
         }
@@ -162,25 +223,62 @@ public class HudSection extends AdvancedChatScreenSection {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        int button = click.button();
+
+        AdvancedChatHud.LOGGER.info("[HudSection] mouseClicked: x=" + mouseX + ", y=" + mouseY + ", button=" + button);
+
+        // Handle context menu clicks manually
+        if (menu != null) {
+            if (button == 0) {
+                // Left click - check if we clicked on a menu item
+                if (hoveredMenuEntry != null && menuOptions != null) {
+                    ContextMenu.ContextConsumer action = menuOptions.get(hoveredMenuEntry);
+                    if (action != null) {
+                        action.takeAction(menu.getContextX(), menu.getContextY());
+                        menu = null;
+                        menuOptions = null;
+                        hoveredMenuEntry = null;
+                        return true;
+                    }
+                }
+            }
+            // Any click (even outside) closes the menu
+            menu = null;
+            menuOptions = null;
+            hoveredMenuEntry = null;
+            return true;
+        }
+
         if (button == 1) {
             createContextMenu((int) mouseX, (int) mouseY);
             return true;
         }
-        if (menu != null && menu.onMouseClicked((int) mouseX, (int) mouseY, button)) {
-            return true;
-        }
-        return WindowManager.getInstance().mouseClicked(getScreen(), mouseX, mouseY, button);
+
+        boolean result = WindowManager.getInstance().mouseClicked(getScreen(), mouseX, mouseY, button);
+        AdvancedChatHud.LOGGER.info("[HudSection] mouseClicked result: " + result);
+        return result;
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int mouseButton) {
+    public boolean mouseReleased(Click click) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        int mouseButton = click.button();
+
+        AdvancedChatHud.LOGGER.info("[HudSection] mouseReleased: x=" + mouseX + ", y=" + mouseY + ", button=" + mouseButton);
         return WindowManager.getInstance().mouseReleased(mouseX, mouseY, mouseButton);
     }
 
     @Override
-    public boolean mouseDragged(
-            double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        int button = click.button();
+
+        AdvancedChatHud.LOGGER.info("[HudSection] mouseDragged: x=" + mouseX + ", y=" + mouseY);
         return WindowManager.getInstance().mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
@@ -193,10 +291,13 @@ public class HudSection extends AdvancedChatScreenSection {
         if (amount < -1.0D) {
             amount = -1.0D;
         }
-        if (!Screen.hasShiftDown()) {
+        // Note: Screen.hasShiftDown() is now accessed differently in Minecraft 1.21+
+        // For now, always use the non-shift behavior
+        // if (!Screen.hasShiftDown()) {
             amount *= 7.0D;
-        }
+        // }
 
+        AdvancedChatHud.LOGGER.info("[HudSection] mouseScrolled: amount=" + amount);
         return WindowManager.getInstance().scroll(amount, mouseX, mouseY);
     }
 }

@@ -1,13 +1,20 @@
 plugins {
-    id 'fabric-loom' version '1.11-SNAPSHOT'
-    id 'maven-publish'
-    id "io.freefair.lombok" version "8.10"
+	id 'fabric-loom' version "${loom_version}"
+	id 'maven-publish'
+	id 'io.freefair.lombok' version '8.10'
 }
 
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
 
-archivesBaseName = project.archives_base_name
+base {
+	archivesName = project.archives_base_name
+}
 version = "${project.minecraft_version}-${project.mod_version}"
 group = project.maven_group
 
@@ -17,53 +24,58 @@ if (file("extra.properties").exists()) {
 }
 
 repositories {
-    mavenCentral()
-    maven { url 'https://masa.dy.fi/maven' }
-    maven { url 'https://jitpack.io' }
-    maven {
-        url = uri("https://maven.pkg.github.com/Arematics/AdvancedChatCore")
-        credentials {
-            username = findProperty("gpr.user")?.toString() ?: System.getenv("GITHUB_ACTOR")
-            password = findProperty("gpr.key")?.toString()  ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
+	mavenCentral()
+	maven { url 'https://masa.dy.fi/maven' }
+	maven { url 'https://jitpack.io' }
+	maven { url 'https://maven.fallenbreath.me/releases' }
+	maven {
+		url = uri("https://maven.pkg.github.com/Arematics/AdvancedChatCore")
+		credentials {
+			username = findProperty("gpr.user")?.toString() ?: System.getenv("GITHUB_ACTOR")
+			password = findProperty("gpr.key")?.toString()  ?: System.getenv("GITHUB_TOKEN")
+		}
+	}
+	maven {
+		url = uri("https://maven.pkg.github.com/ThePro1604/AdvancedChatCore-Update")
+		credentials {
+			username = findProperty("gpr.user")?.toString() ?: System.getenv("GITHUB_ACTOR")
+			password = findProperty("gpr.key")?.toString()  ?: System.getenv("GITHUB_TOKEN")
+		}
+	}
 }
 
 dependencies {
-    compileOnly("org.projectlombok:lombok:1.18.34")
-    annotationProcessor("org.projectlombok:lombok:1.18.34")
+	compileOnly("org.projectlombok:lombok:1.18.34")
+	annotationProcessor("org.projectlombok:lombok:1.18.34")
 
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-    modImplementation("com.github.sakura-ryoko:malilib:1.21.8-${project.malilib_version}")
-    modImplementation "com.arematics:advancedchatcore:${project.minecraft_version}-${project.advancedchat_version}"
-    modImplementation 'com.github.DarkKronicle.Konstruct:core:2.0.3-build1'
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	modImplementation "com.github.sakura-ryoko:malilib:${project.malilib_version}"
+	modImplementation "com.arematics:advancedchatcore:${project.minecraft_version}-${project.advancedchat_version}"
+	modImplementation 'com.github.DarkKronicle.Konstruct:core:2.0.3-build1'
 }
 
 processResources {
-    inputs.property "version", project.version
+	inputs.property "version", project.version
 
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = "UTF-8"
-    it.options.release = 21
+	it.options.encoding = "UTF-8"
+	it.options.release = 21
 }
 
-// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-// if it is present.
-// If you remove this task, sources will not be generated.
 tasks.register('sourcesJar', Jar) {
-    dependsOn classes
-    archiveClassifier.set('sources')
-    from sourceSets.main.allSource
+	dependsOn classes
+	archiveClassifier.set('sources')
+	from sourceSets.main.allSource
 }
 
 jar {
-    from "LICENSE.txt"
+	from "LICENSE.txt"
 }

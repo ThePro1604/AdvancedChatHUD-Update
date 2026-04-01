@@ -8,8 +8,11 @@
 package io.github.darkkronicle.advancedchathud.tabs;
 
 import com.google.gson.JsonArray;
+import fi.dy.masa.malilib.config.options.ConfigColor;
 import fi.dy.masa.malilib.util.FileUtils;
+import fi.dy.masa.malilib.util.StringUtils;
 import io.github.darkkronicle.Konstruct.NodeException;
+import io.github.darkkronicle.advancedchatcore.util.Color;
 import io.github.darkkronicle.Konstruct.functions.Function;
 import io.github.darkkronicle.Konstruct.nodes.Node;
 import io.github.darkkronicle.Konstruct.parser.IntRange;
@@ -46,13 +49,18 @@ public class MainChatTab extends AbstractChatTab {
     @Getter
     private NodeProcessor processor = null;
 
+    /** Helper method to convert ConfigColor to Color */
+    private static Color getColor(ConfigColor configColor) {
+        return new Color(StringUtils.getColor(configColor.getStringValue(), 0xFFFFFFFF));
+    }
+
     public MainChatTab() {
         super(
                 "Main",
                 HudConfigStorage.MAIN_TAB.getAbbreviation().config.getStringValue(),
-                HudConfigStorage.MAIN_TAB.getMainColor().config.get(),
-                HudConfigStorage.MAIN_TAB.getBorderColor().config.get(),
-                HudConfigStorage.MAIN_TAB.getInnerColor().config.get(),
+                getColor(HudConfigStorage.MAIN_TAB.getMainColor().config),
+                getColor(HudConfigStorage.MAIN_TAB.getBorderColor().config),
+                getColor(HudConfigStorage.MAIN_TAB.getInnerColor().config),
                 HudConfigStorage.MAIN_TAB.getShowUnread().config.getBooleanValue(),
                 HudConfigStorage.MAIN_TAB.getUuid());
         setUpTabs();
@@ -60,9 +68,9 @@ public class MainChatTab extends AbstractChatTab {
 
     public void refreshOptions() {
         this.abbreviation = HudConfigStorage.MAIN_TAB.getAbbreviation().config.getStringValue();
-        this.mainColor = HudConfigStorage.MAIN_TAB.getMainColor().config.get();
-        this.innerColor = HudConfigStorage.MAIN_TAB.getInnerColor().config.get();
-        this.borderColor = HudConfigStorage.MAIN_TAB.getBorderColor().config.get();
+        this.mainColor = getColor(HudConfigStorage.MAIN_TAB.getMainColor().config);
+        this.innerColor = getColor(HudConfigStorage.MAIN_TAB.getInnerColor().config);
+        this.borderColor = getColor(HudConfigStorage.MAIN_TAB.getBorderColor().config);
         this.showUnread = HudConfigStorage.MAIN_TAB.getShowUnread().config.getBooleanValue();
         this.uuid = HudConfigStorage.MAIN_TAB.getUuid();
     }

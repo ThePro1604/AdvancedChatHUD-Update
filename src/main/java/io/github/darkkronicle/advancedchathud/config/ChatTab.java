@@ -13,11 +13,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
+import fi.dy.masa.malilib.config.options.ConfigColor;
 import fi.dy.masa.malilib.config.options.ConfigInteger;
 import fi.dy.masa.malilib.config.options.ConfigString;
 import fi.dy.masa.malilib.util.StringUtils;
 import io.github.darkkronicle.advancedchatcore.config.SaveableConfig;
-import io.github.darkkronicle.advancedchatcore.config.options.ConfigColor;
 import io.github.darkkronicle.advancedchatcore.interfaces.IJsonSave;
 import io.github.darkkronicle.advancedchatcore.util.Colors;
 import io.github.darkkronicle.advancedchatcore.util.FindType;
@@ -79,7 +79,7 @@ public class ChatTab {
                     "mainColor",
                     new ConfigColor(
                             translate("maincolor"),
-                            Colors.getInstance().getColorOrWhite("gray").withAlpha(100),
+                            String.format("#%08X", Colors.getInstance().getColorOrWhite("gray").withAlpha(100).color()),
                             translate("info.maincolor")));
 
     private SaveableConfig<ConfigColor> borderColor =
@@ -87,7 +87,7 @@ public class ChatTab {
                     "borderColor",
                     new ConfigColor(
                             translate("bordercolor"),
-                            Colors.getInstance().getColorOrWhite("black").withAlpha(180),
+                            String.format("#%08X", Colors.getInstance().getColorOrWhite("black").withAlpha(180).color()),
                             translate("info.bordercolor")));
 
     private SaveableConfig<ConfigColor> innerColor =
@@ -95,7 +95,7 @@ public class ChatTab {
                     "innerColor",
                     new ConfigColor(
                             translate("innercolor"),
-                            Colors.getInstance().getColorOrWhite("black").withAlpha(100),
+                            String.format("#%08X", Colors.getInstance().getColorOrWhite("black").withAlpha(100).color()),
                             translate("info.innercolor")));
 
     private SaveableConfig<ConfigBoolean> showUnread =

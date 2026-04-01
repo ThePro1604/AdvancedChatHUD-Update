@@ -6,6 +6,7 @@
   ],
   "client": [
     "MixinChatHud",
+    "MixinInGameHud",
     "MixinMinecraftClient"
   ],
   "injectors": {

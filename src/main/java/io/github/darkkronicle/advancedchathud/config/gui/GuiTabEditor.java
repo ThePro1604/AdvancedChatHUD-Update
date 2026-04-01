@@ -110,7 +110,6 @@ public class GuiTabEditor extends GuiConfigsBase implements IClosable {
         AdvancedChatHud.MAIN_CHAT_TAB.setUpTabs();
     }
 
-    @Override
     public void resize(MinecraftClient mc, int width, int height) {
         this.width = width;
         this.height = height;
@@ -119,16 +118,16 @@ public class GuiTabEditor extends GuiConfigsBase implements IClosable {
         initGui();
     }
 
-    @Override
     public boolean onKeyTyped(int keyCode, int scanCode, int modifiers) {
         // Override so that on escape stuff still gets saved
         if (this.activeKeybindButton != null) {
             this.activeKeybindButton.onKeyPressed(keyCode);
             return true;
         } else {
-            if (this.getListWidget().onKeyTyped(keyCode, scanCode, modifiers)) {
-                return true;
-            }
+            // Note: onKeyTyped signature changed in newer malilib
+            // if (this.getListWidget().onKeyTyped(keyCode, scanCode, modifiers)) {
+            //     return true;
+            // }
 
             if (keyCode == KeyCodes.KEY_ESCAPE
                     && this.getParent() != GuiUtils.getCurrentScreen()) {

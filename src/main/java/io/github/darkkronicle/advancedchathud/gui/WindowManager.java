@@ -64,15 +64,19 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
 
     public void loadFromJson(JsonArray array) {
         reset();
+        AdvancedChatHud.LOGGER.info("[WindowManager] loadFromJson called, array=" + (array == null ? "null" : "size=" + array.size()));
+        AdvancedChatHud.LOGGER.info("[WindowManager] VANILLA_HUD=" + HudConfigStorage.General.VANILLA_HUD.config.getBooleanValue());
         if (!HudConfigStorage.General.VANILLA_HUD.config.getBooleanValue()) {
             if (array == null || array.size() == 0) {
                 ChatWindow base = new ChatWindow(AdvancedChatHud.MAIN_CHAT_TAB);
                 base.setSelected(true);
                 addWindow(base);
+                AdvancedChatHud.LOGGER.info("[WindowManager] Created default window, total windows=" + windows.size());
                 return;
             }
         } else {
             if (array == null || array.size() == 0) {
+                AdvancedChatHud.LOGGER.info("[WindowManager] VANILLA_HUD is enabled, no windows created");
                 return;
             }
         }
@@ -93,6 +97,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
             }
             addWindow(w);
         }
+        AdvancedChatHud.LOGGER.info("[WindowManager] Finished loading, total windows=" + windows.size());
     }
 
     public JsonArray saveJson() {
@@ -104,8 +109,13 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
         return array;
     }
 
-    @Override
+    private static boolean loggedRender = false;
+
     public void onRenderGameOverlayPost(DrawContext drawContext) {
+        if (!loggedRender) {
+            AdvancedChatHud.LOGGER.info("[WindowManager] onRenderGameOverlayPost() called - rendering " + windows.size() + " windows");
+            loggedRender = true;
+        }
         boolean isFocused = isChatFocused();
         int ticks = client.inGameHud.getTicks();
         if (!HudConfigStorage.General.RENDER_IN_OTHER_GUI.config.getBooleanValue() && !isFocused && client.currentScreen != null) {
@@ -245,8 +255,11 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                 resize = true;
             }
             Style style = over.getText(mouseX, mouseY);
-            if (style != null && screen.handleTextClick(style)) {
-                return true;
+            // Handle text click - open URLs, run commands, etc.
+            if (style != null) {
+                if (handleStyleClick(style, screen)) {
+                    return true;
+                }
             }
             if (over.onMouseClicked(mouseX, mouseY, button)) {
                 return true;
@@ -286,13 +299,18 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
     }
 
     public void onTabButton(AbstractChatTab tab) {
+        AdvancedChatHud.LOGGER.info("[WindowManager] onTabButton called for tab: " + tab.getName());
+        ChatWindow selected = null;
         for (ChatWindow w : windows) {
             if (w.isSelected()) {
+                selected = w;
+                AdvancedChatHud.LOGGER.info("[WindowManager] Found selected window, changing tab from " + w.getTab().getName() + " to " + tab.getName());
                 w.setTab(tab);
                 return;
             }
         }
         // Set it if no other window is selected
+        AdvancedChatHud.LOGGER.info("[WindowManager] No window selected, setting vanilla HUD tab to " + tab.getName());
         IChatHud.getInstance().setTab(tab);
     }
 
@@ -376,5 +394,24 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
 
     public void configureTab(AdvancedChatScreen screen, ChatWindow window) {
         GuiBase.openGui(new ChatWindowEditor(screen, window));
+    }
+
+    /**
+     * Handle clicking on a style (for URLs, commands, etc.)
+     * Reimplements Screen.handleTextClick functionality for Minecraft 1.21+
+     *
+     * Note: Currently disabled due to API changes in Minecraft 1.21.11
+     * TODO: Re-implement when ClickEvent API is stable
+     */
+    private boolean handleStyleClick(Style style, Screen screen) {
+        if (style == null) {
+            return false;
+        }
+
+        // TODO: ClickEvent API changed in Minecraft 1.21.11
+        // Need to find the correct way to access the click event value
+        // For now, text hover detection works but clicking is disabled
+
+        return false;
     }
 }

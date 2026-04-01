@@ -33,6 +33,7 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
 
     private TextFieldWrapper<GuiTextFieldGeneric> name;
     private List<TextFieldWrapper<GuiTextFieldGeneric>> texts;
+    private GuiTextFieldGeneric nameField;
     private ConfigOptionList findType =
             new ConfigOptionList(
                     "advancedchathud.config.match.findtype",
@@ -73,9 +74,9 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
                 });
 
         pos -= findWidth + 1;
-        GuiTextFieldGeneric nameField = new GuiTextFieldGeneric(pos - nameWidth, y, nameWidth, 20, MinecraftClient.getInstance().textRenderer);
-        nameField.setMaxLength(64000);
-        nameField.setText(entry.getPattern());
+        this.nameField = new GuiTextFieldGeneric(pos - nameWidth, y, nameWidth, 20, MinecraftClient.getInstance().textRenderer);
+        this.nameField.setMaxLength(64000);
+        this.nameField.setText(entry.getPattern());
         name = new TextFieldWrapper<>(nameField, new SaveListener(this));
         parent.addTextField(name);
         texts = new ArrayList<>();
@@ -95,7 +96,6 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
         return texts;
     }
 
-    @Override
     public void renderEntry(int mouseX, int mouseY, boolean selected, DrawContext drawContext) {}
 
     @Override
@@ -104,7 +104,8 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
     }
 
     public void save() {
-        entry.setPattern(name.getTextField().getText());
+        // Access the wrapped text field directly using the stored reference
+        entry.setPattern(nameField.getText());
     }
 
     private static class SaveListener implements ITextFieldListener<GuiTextFieldGeneric> {

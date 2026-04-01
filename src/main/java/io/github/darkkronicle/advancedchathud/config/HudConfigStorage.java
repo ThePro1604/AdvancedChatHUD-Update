@@ -16,6 +16,7 @@ import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.IConfigHandler;
 import fi.dy.masa.malilib.config.IConfigOptionListEntry;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
+import fi.dy.masa.malilib.config.options.ConfigColor;
 import fi.dy.masa.malilib.config.options.ConfigDouble;
 import fi.dy.masa.malilib.config.options.ConfigInteger;
 import fi.dy.masa.malilib.config.options.ConfigOptionList;
@@ -24,7 +25,6 @@ import fi.dy.masa.malilib.util.JsonUtils;
 import fi.dy.masa.malilib.util.StringUtils;
 import io.github.darkkronicle.advancedchatcore.config.ConfigStorage;
 import io.github.darkkronicle.advancedchatcore.config.SaveableConfig;
-import io.github.darkkronicle.advancedchatcore.config.options.ConfigColor;
 import io.github.darkkronicle.advancedchatcore.util.Colors;
 import io.github.darkkronicle.advancedchathud.AdvancedChatHud;
 import io.github.darkkronicle.advancedchathud.gui.WindowManager;
@@ -174,7 +174,7 @@ public class HudConfigStorage implements IConfigHandler {
                         "emptyTextColor",
                         new ConfigColor(
                                 translate("emptytextcolor"),
-                                Colors.getInstance().getColorOrWhite("white"),
+                                String.format("#%08X", Colors.getInstance().getColorOrWhite("white").color()),
                                 translate("info.emptytextcolor")));
 
         public static final SaveableConfig<ConfigOptionList> HUD_LINE_TYPE =
@@ -303,7 +303,7 @@ public class HudConfigStorage implements IConfigHandler {
                     WindowManager.getInstance().loadFromJson(null);
                 }
 
-                ConfigStorage.readOptions(root, General.NAME, General.OPTIONS);
+                ConfigStorage.readOptions(root, General.NAME, (List) General.OPTIONS);
 
                 int version = JsonUtils.getIntegerOrDefault(root, "configVersion", 0);
             }
@@ -317,7 +317,7 @@ public class HudConfigStorage implements IConfigHandler {
             ChatTab.ChatTabJsonSave tabJson = new ChatTab.ChatTabJsonSave();
             JsonObject root = new JsonObject();
 
-            ConfigStorage.writeOptions(root, General.NAME, General.OPTIONS);
+            ConfigStorage.writeOptions(root, General.NAME, (List) General.OPTIONS);
 
             root.add("maintab", tabJson.save(MAIN_TAB));
 

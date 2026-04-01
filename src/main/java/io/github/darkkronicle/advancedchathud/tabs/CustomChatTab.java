@@ -7,6 +7,8 @@
  */
 package io.github.darkkronicle.advancedchathud.tabs;
 
+import fi.dy.masa.malilib.config.options.ConfigColor;
+import fi.dy.masa.malilib.util.StringUtils;
 import io.github.darkkronicle.Konstruct.functions.Function;
 import io.github.darkkronicle.Konstruct.nodes.LiteralNode;
 import io.github.darkkronicle.Konstruct.nodes.Node;
@@ -14,6 +16,7 @@ import io.github.darkkronicle.Konstruct.parser.IntRange;
 import io.github.darkkronicle.Konstruct.parser.ParseContext;
 import io.github.darkkronicle.Konstruct.parser.Result;
 import io.github.darkkronicle.Konstruct.type.BooleanObject;
+import io.github.darkkronicle.advancedchatcore.util.Color;
 import io.github.darkkronicle.advancedchatcore.util.SearchUtils;
 import io.github.darkkronicle.advancedchathud.AdvancedChatHud;
 import io.github.darkkronicle.advancedchathud.config.ChatTab;
@@ -45,13 +48,18 @@ public class CustomChatTab extends AbstractChatTab {
     @Setter
     private Function function;
 
+    /** Helper method to convert ConfigColor to Color */
+    private static Color getColor(ConfigColor configColor) {
+        return new Color(StringUtils.getColor(configColor.getStringValue(), 0xFFFFFFFF));
+    }
+
     public CustomChatTab(ChatTab tab) {
         super(
             tab.getName().config.getStringValue(),
             tab.getAbbreviation().config.getStringValue(),
-            tab.getMainColor().config.get(),
-            tab.getBorderColor().config.get(),
-            tab.getInnerColor().config.get(),
+            getColor(tab.getMainColor().config),
+            getColor(tab.getBorderColor().config),
+            getColor(tab.getInnerColor().config),
             tab.getShowUnread().config.getBooleanValue(),
             tab.getUuid()
         );

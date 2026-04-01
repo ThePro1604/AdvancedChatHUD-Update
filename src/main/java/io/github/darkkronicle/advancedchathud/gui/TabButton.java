@@ -13,9 +13,11 @@ import io.github.darkkronicle.advancedchatcore.gui.CleanButton;
 import io.github.darkkronicle.advancedchatcore.util.Color;
 import io.github.darkkronicle.advancedchatcore.util.Colors;
 import io.github.darkkronicle.advancedchatcore.util.TextUtil;
+import io.github.darkkronicle.advancedchathud.AdvancedChatHud;
 import io.github.darkkronicle.advancedchathud.config.HudConfigStorage;
 import io.github.darkkronicle.advancedchathud.itf.IChatHud;
 import io.github.darkkronicle.advancedchathud.tabs.AbstractChatTab;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
@@ -33,9 +35,9 @@ public class TabButton extends CleanButton {
     private TabButton(AbstractChatTab tab, int x, int y, int width, int height) {
         super(x, y, width, height, tab.getMainColor(), tab.getAbbreviation());
         this.tab = tab;
+        AdvancedChatHud.LOGGER.info("[TabButton] Created button for tab: " + tab.getName() + " (UUID: " + tab.getUuid() + ", Object: " + System.identityHashCode(tab) + ")");
     }
 
-    @Override
     public void render(DrawContext drawContext, int mouseX, int mouseY, boolean selected) {
         int relMX = mouseX - x;
         int relMY = mouseY - y;
@@ -58,22 +60,31 @@ public class TabButton extends CleanButton {
             color = new Color(color.red() / 2, color.green() / 2, color.blue() / 2, 100);
         }
 
-        RenderUtils.drawRect(drawContext, x, y, width, height, color.color());
+        // Use DrawContext directly instead of GuiContext wrapper
+        drawContext.fill(x, y, x + width, y + height, color.color());
 
-        drawStringWithShadow(drawContext,
-                x + PADDING, y + PADDING, selected ? WHITE : GRAY, displayString);
+        drawContext.drawTextWithShadow(mc.textRenderer, displayString, x + PADDING, y + PADDING, selected ? WHITE : GRAY);
         if (tab.isShowUnread() && tab.getUnread() > 0) {
             String unread = TextUtil.toSuperscript(Math.min(tab.getUnread(), 99));
-            drawCenteredString(drawContext,
-                    x + width - ((UNREAD_WIDTH + PADDING) / 2) - 1,
-                    y + PADDING,
-                    RED,
-                    unread);
+            int unreadX = x + width - ((UNREAD_WIDTH + PADDING) / 2) - 1;
+            int unreadWidth = mc.textRenderer.getWidth(unread);
+            drawContext.drawTextWithShadow(mc.textRenderer, unread, unreadX - unreadWidth / 2, y + PADDING, RED);
         }
     }
 
     @Override
-    protected boolean onMouseClickedImpl(int mouseX, int mouseY, int mouseButton) {
+    public boolean onMouseClicked(Click click, boolean doubled) {
+        // Check if click is inside button bounds
+        int clickX = (int) click.x();
+        int clickY = (int) click.y();
+        boolean inside = clickX >= x && clickX <= x + width && clickY >= y && clickY <= y + height;
+
+        AdvancedChatHud.LOGGER.info("[TabButton] onMouseClicked called for tab: " + tab.getName() + " at position (" + x + "," + y + ") size (" + width + "x" + height + ") click at (" + clickX + "," + clickY + ") inside=" + inside);
+
+        if (!inside) {
+            return false;
+        }
+
         this.mc
                 .getSoundManager()
                 .play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -86,6 +97,8 @@ public class TabButton extends CleanButton {
         if (tab.isShowUnread()) {
             width += UNREAD_WIDTH;
         }
-        return new TabButton(tab, x, y, width, PADDING + 8 + PADDING);
+        TabButton button = new TabButton(tab, x, y, width, PADDING + 8 + PADDING);
+        AdvancedChatHud.LOGGER.info("[TabButton] fromTab created button at (" + x + "," + y + ") size " + width + "x" + (PADDING + 8 + PADDING));
+        return button;
     }
 }

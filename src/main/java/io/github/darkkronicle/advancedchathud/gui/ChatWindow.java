@@ -8,6 +8,7 @@
 package io.github.darkkronicle.advancedchathud.gui;
 
 import com.google.gson.JsonObject;
+import fi.dy.masa.malilib.config.options.ConfigColor;
 import fi.dy.masa.malilib.util.StringUtils;
 import io.github.darkkronicle.advancedchatcore.chat.ChatMessage;
 import io.github.darkkronicle.advancedchatcore.config.ConfigStorage;
@@ -592,7 +593,7 @@ public class ChatWindow {
             // Start of a line
         }
         Color background = line.getParent().getBackgroundColor();
-        Color text = HudConfigStorage.General.EMPTY_TEXT_COLOR.config.get();
+        Color text = new Color(StringUtils.getColor(HudConfigStorage.General.EMPTY_TEXT_COLOR.config.getStringValue(), 0xFFFFFFFF));
         if (background == null) {
             background = tab.getInnerColor();
         }
@@ -737,10 +738,8 @@ public class ChatWindow {
                     if (renderRight) {
                         truestX = trueX - (getScaledWidth() - line.getWidth()) + headOffset() + HudConfigStorage.General.RIGHT_PAD.config.getIntegerValue() + HudConfigStorage.General.LEFT_PAD.config.getIntegerValue();
                     }
-                    return this.client
-                            .textRenderer
-                            .getTextHandler()
-                            .getStyleAt(line.getText(), (int) truestX);
+                    // Get style at position using OrderedText visitor
+                    return getStyleAtPosition(line.getText().asOrderedText(), (int) truestX);
                 }
             }
             if (lineHeight >= scrolledHeight) {
@@ -979,5 +978,37 @@ public class ChatWindow {
         for (ChatMessage m : lines) {
             m.formatChildren(getConvertedWidth());
         }
+    }
+
+    /**
+     * Get style at a specific x position in an OrderedText by visiting characters
+     */
+    private Style getStyleAtPosition(net.minecraft.text.OrderedText orderedText, int x) {
+        if (orderedText == null) {
+            return null;
+        }
+
+        final int[] currentX = {0};
+        final Style[] foundStyle = {null};
+
+        // Visit each character in the OrderedText
+        orderedText.accept((index, style, codePoint) -> {
+            if (foundStyle[0] != null) {
+                return false; // Already found, stop visiting
+            }
+
+            int charWidth = client.textRenderer.getWidth(String.valueOf((char) codePoint));
+
+            if (currentX[0] + charWidth > x) {
+                // This character is at the position we're looking for
+                foundStyle[0] = style;
+                return false; // Stop visiting
+            }
+
+            currentX[0] += charWidth;
+            return true; // Continue visiting
+        });
+
+        return foundStyle[0];
     }
 }

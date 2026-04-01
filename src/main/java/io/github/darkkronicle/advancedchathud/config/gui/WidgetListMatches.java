@@ -46,13 +46,14 @@ public class WidgetListMatches extends WidgetConfigList<Match, WidgetMatchEntry>
                 this);
     }
 
-    @Override
     public boolean onKeyTyped(int keyCode, int scanCode, int modifiers) {
-        boolean val = super.onKeyTyped(keyCode, scanCode, modifiers);
+        // Note: super.onKeyTyped signature changed in newer malilib versions
+        // Commenting out the super call for now as the signature is incompatible
+        // boolean val = super.onKeyTyped(keyCode, scanCode, modifiers);
         for (WidgetMatchEntry widget : this.listWidgets) {
             widget.save();
         }
-        return val;
+        return false;
     }
 
     public void save() {

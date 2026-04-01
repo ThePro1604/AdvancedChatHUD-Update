@@ -74,28 +74,30 @@ public abstract class MixinChatHud implements IChatHud {
     }
 
     @Inject(at = @At("HEAD"), method = "render", cancellable = true)
-    private void render(DrawContext context, int currentTick, int mouseX, int mouseY, boolean focused, CallbackInfo ci) {
+    private void render(DrawContext context, net.minecraft.client.font.TextRenderer textRenderer, int currentTick, int mouseX, int mouseY, boolean focused, boolean shiftsMessages, CallbackInfo ci) {
         // Ignore rendering vanilla chat if disabled
         if (!HudConfigStorage.General.VANILLA_HUD.config.getBooleanValue()) {
             ci.cancel();
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "getTextStyleAt", cancellable = true)
-    public void getTextHead(double x, double y, CallbackInfoReturnable<Style> cir) {
-        // Ignore checking vanilla chat for hovered text if disabled
-        if (!HudConfigStorage.General.VANILLA_HUD.config.getBooleanValue()) {
-            cir.setReturnValue(WindowManager.getInstance().getText(x, y));
-        }
-    }
-
-    @Inject(at = @At("RETURN"), method = "getTextStyleAt", cancellable = true)
-    public void getTextReturn(double x, double y, CallbackInfoReturnable<Style> cir) {
-        // If vanilla chat didn't find any text, search on our own windows
-        if (cir.getReturnValue() == null) {
-            cir.setReturnValue(WindowManager.getInstance().getText(x, y));
-        }
-    }
+    // Note: getTextStyleAt method no longer exists in Minecraft 1.21.11
+    // TODO: Find replacement method for text style detection
+    // @Inject(at = @At("HEAD"), method = "getTextStyleAt", cancellable = true)
+    // public void getTextHead(double x, double y, CallbackInfoReturnable<Style> cir) {
+    //     // Ignore checking vanilla chat for hovered text if disabled
+    //     if (!HudConfigStorage.General.VANILLA_HUD.config.getBooleanValue()) {
+    //         cir.setReturnValue(WindowManager.getInstance().getText(x, y));
+    //     }
+    // }
+    //
+    // @Inject(at = @At("RETURN"), method = "getTextStyleAt", cancellable = true)
+    // public void getTextReturn(double x, double y, CallbackInfoReturnable<Style> cir) {
+    //     // If vanilla chat didn't find any text, search on our own windows
+    //     if (cir.getReturnValue() == null) {
+    //         cir.setReturnValue(WindowManager.getInstance().getText(x, y));
+    //     }
+    // }
 
     @Override
     public AbstractChatTab getTab() {
