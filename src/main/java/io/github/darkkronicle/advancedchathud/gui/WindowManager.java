@@ -534,9 +534,12 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
 
             // Try to get the value - iterate through String-returning methods
             String value = null;
+            Object rawValue = null;
+
+
 
             // Try all methods with no parameters to find the value accessor
-            // For different actions, the value might be String (RUN_COMMAND) or URI (OPEN_URL)
+            // For different actions, the value might be String (RUN_COMMAND) or URI (OPEN_URL/OPEN_FILE)
             for (java.lang.reflect.Method method : clickEvent.getClass().getMethods()) {
                 if (method.getParameterCount() == 0) {
                     String methodName = method.getName();
@@ -547,10 +550,12 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                         try {
                             Object result = method.invoke(clickEvent);
                             if (result != null) {
+                                rawValue = result;
                                 // Convert to String based on the type
                                 if (result instanceof String) {
                                     value = (String) result;
                                 } else if (result instanceof java.net.URI) {
+                                    // For URI, preserve the full URI string for later processing
                                     value = result.toString();
                                 } else {
                                     value = result.toString();
@@ -573,10 +578,54 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
 
             switch (action) {
                 case OPEN_URL:
-                    // Open URL in browser
+                    // Open URL in browser (http/https only)
                     try {
-                        java.net.URI uri = new java.net.URI(value);
+                        java.net.URI uri;
+
+                        // If rawValue is already a URI object, use it directly
+                        if (rawValue instanceof java.net.URI) {
+                            uri = (java.net.URI) rawValue;
+                        } else {
+                            uri = new java.net.URI(value);
+                        }
+
                         String scheme = uri.getScheme();
+                        String uriString = uri.toString();
+
+                        // WORKAROUND: Detect screenshot filenames that got corrupted into https:// URIs
+                        // Pattern: https://YYYY-MM-DD_HH.MM.SS.png (where the filename became the hostname)
+                        if (scheme != null && scheme.equalsIgnoreCase("https")) {
+                            // The "hostname" in the corrupted URI is actually the filename
+                            // Try to extract it from the URI string
+                            String uriStr = uri.toString();
+
+                            // Pattern: https://2026-04-02_14.40.44.png
+                            // Extract just the filename part after https://
+                            if (uriStr.startsWith("https://") && uriStr.endsWith(".png")) {
+                                String filename = uriStr.substring(8); // Remove "https://"
+
+                                // Check if it matches screenshot pattern
+                                if (filename.matches("\\d{4}-\\d{2}-\\d{2}_\\d{2}\\.\\d{2}\\.\\d{2}\\.png")) {
+                                    // This is a corrupted screenshot link - find the actual file in screenshots folder
+                                    java.io.File screenshotsDir = new java.io.File(client.runDirectory, "screenshots");
+                                    java.io.File screenshotFile = new java.io.File(screenshotsDir, filename);
+
+                                    if (screenshotFile.exists()) {
+                                        net.minecraft.util.Util.getOperatingSystem().open(screenshotFile);
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Check if this is actually a file:// URI (screenshot case)
+                        if (scheme != null && scheme.equalsIgnoreCase("file")) {
+                            // This should be OPEN_FILE action, but handle it gracefully
+                            java.io.File file = new java.io.File(uri);
+                            net.minecraft.util.Util.getOperatingSystem().open(file);
+                            return true;
+                        }
+
                         if (scheme == null) {
                             throw new java.net.URISyntaxException(value, "Missing protocol");
                         }
@@ -594,10 +643,24 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                     break;
 
                 case OPEN_FILE:
-                    // Open file (usually disabled for security)
+                    // Open file (e.g., screenshots)
                     try {
-                        java.net.URI uri = new java.net.URI(value);
-                        net.minecraft.util.Util.getOperatingSystem().open(uri);
+                        java.io.File file;
+
+                        // If rawValue is a URI object, use it
+                        if (rawValue instanceof java.net.URI) {
+                            java.net.URI uri = (java.net.URI) rawValue;
+                            file = new java.io.File(uri);
+                        } else if (value.startsWith("file://")) {
+                            // It's a URI string - convert to File
+                            file = new java.io.File(new java.net.URI(value));
+                        } else {
+                            // It's a direct file path
+                            file = new java.io.File(value);
+                        }
+
+                        // Open the file with the system default application
+                        net.minecraft.util.Util.getOperatingSystem().open(file);
                         return true;
                     } catch (Exception e) {
                         AdvancedChatHud.LOGGER.error("Failed to open file: " + value, e);
