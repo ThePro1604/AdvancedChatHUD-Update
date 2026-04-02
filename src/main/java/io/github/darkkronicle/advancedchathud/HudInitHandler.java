@@ -28,10 +28,8 @@ public class HudInitHandler implements IInitializationHandler {
 
     @Override
     public void registerModHandlers() {
-        AdvancedChatHud.LOGGER.info("[AdvancedChatHUD] Starting initialization...");
         AdvancedChatCore.FORWARD_TO_HUD = false;
         ConfigManager.getInstance().registerConfigHandler(AdvancedChatHud.MOD_ID, new HudConfigStorage());
-        AdvancedChatHud.LOGGER.info("[AdvancedChatHUD] Config registered");
         GuiConfigHandler.getInstance().addTab(
                 GuiConfigHandler.children("advancedchathud", "advancedchathud.tab.advancedchathud",
                         GuiConfigHandler.wrapSaveableOptions(
@@ -46,19 +44,14 @@ public class HudInitHandler implements IInitializationHandler {
                         )
                 )
         );
-        AdvancedChatHud.LOGGER.info("[AdvancedChatHUD] GUI config tab added");
         IChatHud.getInstance().setTab(AdvancedChatHud.MAIN_CHAT_TAB = new MainChatTab());
-        AdvancedChatHud.LOGGER.info("[AdvancedChatHUD] Main chat tab initialized");
 
         // Register on the clear
         ChatScreenSectionHolder.getInstance().addSectionSupplier(HudSection::new);
-        AdvancedChatHud.LOGGER.info("[AdvancedChatHUD] HudSection registered with ChatScreenSectionHolder");
         ChatHistory.getInstance().addOnClear(() -> WindowManager.getInstance().clear());
         ChatHistory.getInstance().addOnClear(() -> HudChatMessageHolder.getInstance().clear());
         ChatHistory.getInstance().addOnUpdate(HudChatMessageHolder.getInstance());
         RenderEventHandler.getInstance().registerGameOverlayRenderer(WindowManager.getInstance());
-        AdvancedChatHud.LOGGER.info("[AdvancedChatHUD] WindowManager registered as overlay renderer");
         ResolutionEventHandler.ON_RESOLUTION_CHANGE.add(WindowManager.getInstance());
-        AdvancedChatHud.LOGGER.info("[AdvancedChatHUD] Initialization complete!");
     }
 }

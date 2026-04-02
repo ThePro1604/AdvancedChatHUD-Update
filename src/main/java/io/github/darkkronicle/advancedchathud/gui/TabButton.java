@@ -35,7 +35,6 @@ public class TabButton extends CleanButton {
     private TabButton(AbstractChatTab tab, int x, int y, int width, int height) {
         super(x, y, width, height, tab.getMainColor(), tab.getAbbreviation());
         this.tab = tab;
-        AdvancedChatHud.LOGGER.info("[TabButton] Created button for tab: " + tab.getName() + " (UUID: " + tab.getUuid() + ", Object: " + System.identityHashCode(tab) + ")");
     }
 
     public void render(DrawContext drawContext, int mouseX, int mouseY, boolean selected) {
@@ -79,8 +78,6 @@ public class TabButton extends CleanButton {
         int clickY = (int) click.y();
         boolean inside = clickX >= x && clickX <= x + width && clickY >= y && clickY <= y + height;
 
-        AdvancedChatHud.LOGGER.info("[TabButton] onMouseClicked called for tab: " + tab.getName() + " at position (" + x + "," + y + ") size (" + width + "x" + height + ") click at (" + clickX + "," + clickY + ") inside=" + inside);
-
         if (!inside) {
             return false;
         }
@@ -98,7 +95,6 @@ public class TabButton extends CleanButton {
             width += UNREAD_WIDTH;
         }
         TabButton button = new TabButton(tab, x, y, width, PADDING + 8 + PADDING);
-        AdvancedChatHud.LOGGER.info("[TabButton] fromTab created button at (" + x + "," + y + ") size " + width + "x" + (PADDING + 8 + PADDING));
         return button;
     }
 }

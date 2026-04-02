@@ -77,10 +77,8 @@ public class HudSection extends AdvancedChatScreenSection {
 
     @Override
     public void initGui() {
-        AdvancedChatHud.LOGGER.info("[HudSection] initGui() called");
         boolean left = !HudConfigStorage.General.TAB_BUTTONS_ON_RIGHT.config.getBooleanValue();
         List<AbstractChatTab> tabs = new ArrayList<>(AdvancedChatHud.MAIN_CHAT_TAB.getAllChatTabs());
-        AdvancedChatHud.LOGGER.info("[HudSection] Found " + tabs.size() + " tabs to add as buttons");
         if (!left) {
             Collections.reverse(tabs);
         }
@@ -89,7 +87,6 @@ public class HudSection extends AdvancedChatScreenSection {
         for (AbstractChatTab tab : tabs) {
             TabButton button = TabButton.fromTab(tab, 0, 0);
             rows.add("tabs", button);
-            AdvancedChatHud.LOGGER.info("[HudSection] Added tab button: " + tab.getName() + " (UUID: " + tab.getUuid() + ")");
         }
         IconButton window = new IconButton(0, 0, 14, 32, ADD_ICON, (button) -> WindowManager.getInstance().onTabAddButton(IChatHud.getInstance().getTab()));
         IconButton reset = new IconButton(0, 0, 14, 32, RESET_ICON, (button) -> WindowManager.getInstance().reset());
@@ -100,7 +97,6 @@ public class HudSection extends AdvancedChatScreenSection {
             rows.add("tabs", window, 0);
             rows.add("tabs", reset, 0);
         }
-        AdvancedChatHud.LOGGER.info("[HudSection] initGui() complete - buttons added");
 
         if (getScreen().getChatField().getText().isEmpty()) {
             ChatWindow chatWindow = WindowManager.getInstance().getSelected();
@@ -228,8 +224,6 @@ public class HudSection extends AdvancedChatScreenSection {
         double mouseY = click.y();
         int button = click.button();
 
-        AdvancedChatHud.LOGGER.info("[HudSection] mouseClicked: x=" + mouseX + ", y=" + mouseY + ", button=" + button);
-
         // Handle context menu clicks manually
         if (menu != null) {
             if (button == 0) {
@@ -258,7 +252,6 @@ public class HudSection extends AdvancedChatScreenSection {
         }
 
         boolean result = WindowManager.getInstance().mouseClicked(getScreen(), mouseX, mouseY, button);
-        AdvancedChatHud.LOGGER.info("[HudSection] mouseClicked result: " + result);
         return result;
     }
 
@@ -268,7 +261,6 @@ public class HudSection extends AdvancedChatScreenSection {
         double mouseY = click.y();
         int mouseButton = click.button();
 
-        AdvancedChatHud.LOGGER.info("[HudSection] mouseReleased: x=" + mouseX + ", y=" + mouseY + ", button=" + mouseButton);
         return WindowManager.getInstance().mouseReleased(mouseX, mouseY, mouseButton);
     }
 
@@ -278,7 +270,6 @@ public class HudSection extends AdvancedChatScreenSection {
         double mouseY = click.y();
         int button = click.button();
 
-        AdvancedChatHud.LOGGER.info("[HudSection] mouseDragged: x=" + mouseX + ", y=" + mouseY);
         return WindowManager.getInstance().mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
@@ -297,7 +288,6 @@ public class HudSection extends AdvancedChatScreenSection {
             amount *= 7.0D;
         // }
 
-        AdvancedChatHud.LOGGER.info("[HudSection] mouseScrolled: amount=" + amount);
         return WindowManager.getInstance().scroll(amount, mouseX, mouseY);
     }
 }

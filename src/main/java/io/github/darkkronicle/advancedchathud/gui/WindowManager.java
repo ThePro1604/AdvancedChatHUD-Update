@@ -64,19 +64,15 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
 
     public void loadFromJson(JsonArray array) {
         reset();
-        AdvancedChatHud.LOGGER.info("[WindowManager] loadFromJson called, array=" + (array == null ? "null" : "size=" + array.size()));
-        AdvancedChatHud.LOGGER.info("[WindowManager] VANILLA_HUD=" + HudConfigStorage.General.VANILLA_HUD.config.getBooleanValue());
         if (!HudConfigStorage.General.VANILLA_HUD.config.getBooleanValue()) {
             if (array == null || array.size() == 0) {
                 ChatWindow base = new ChatWindow(AdvancedChatHud.MAIN_CHAT_TAB);
                 base.setSelected(true);
                 addWindow(base);
-                AdvancedChatHud.LOGGER.info("[WindowManager] Created default window, total windows=" + windows.size());
                 return;
             }
         } else {
             if (array == null || array.size() == 0) {
-                AdvancedChatHud.LOGGER.info("[WindowManager] VANILLA_HUD is enabled, no windows created");
                 return;
             }
         }
@@ -97,7 +93,6 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
             }
             addWindow(w);
         }
-        AdvancedChatHud.LOGGER.info("[WindowManager] Finished loading, total windows=" + windows.size());
     }
 
     public JsonArray saveJson() {
@@ -109,13 +104,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
         return array;
     }
 
-    private static boolean loggedRender = false;
-
     public void onRenderGameOverlayPost(DrawContext drawContext) {
-        if (!loggedRender) {
-            AdvancedChatHud.LOGGER.info("[WindowManager] onRenderGameOverlayPost() called - rendering " + windows.size() + " windows");
-            loggedRender = true;
-        }
         boolean isFocused = isChatFocused();
         int ticks = client.inGameHud.getTicks();
         if (!HudConfigStorage.General.RENDER_IN_OTHER_GUI.config.getBooleanValue() && !isFocused && client.currentScreen != null) {
@@ -386,13 +375,8 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                 return true;
             }
             Style style = over.getText(mouseX, mouseY);
-            AdvancedChatHud.LOGGER.info("[WindowManager] Checking for style at position (" + mouseX + ", " + mouseY + "), found: " + (style != null));
             // Handle text click - open URLs, run commands, etc.
             if (style != null) {
-                AdvancedChatHud.LOGGER.info("[WindowManager] Style has clickEvent: " + (style.getClickEvent() != null));
-                if (style.getClickEvent() != null) {
-                    AdvancedChatHud.LOGGER.info("[WindowManager] ClickEvent action: " + style.getClickEvent().getAction());
-                }
                 if (handleStyleClick(style, screen)) {
                     return true;
                 }
@@ -436,18 +420,15 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
     }
 
     public void onTabButton(AbstractChatTab tab) {
-        AdvancedChatHud.LOGGER.info("[WindowManager] onTabButton called for tab: " + tab.getName());
         ChatWindow selected = null;
         for (ChatWindow w : windows) {
             if (w.isSelected()) {
                 selected = w;
-                AdvancedChatHud.LOGGER.info("[WindowManager] Found selected window, changing tab from " + w.getTab().getName() + " to " + tab.getName());
                 w.setTab(tab);
                 return;
             }
         }
         // Set it if no other window is selected
-        AdvancedChatHud.LOGGER.info("[WindowManager] No window selected, setting vanilla HUD tab to " + tab.getName());
         IChatHud.getInstance().setTab(tab);
     }
 
@@ -593,22 +574,18 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
             switch (action) {
                 case OPEN_URL:
                     // Open URL in browser
-                    AdvancedChatHud.LOGGER.info("[WindowManager] OPEN_URL - value: " + value);
                     try {
                         java.net.URI uri = new java.net.URI(value);
                         String scheme = uri.getScheme();
                         if (scheme == null) {
-                            AdvancedChatHud.LOGGER.warn("[WindowManager] URL missing protocol: " + value);
                             throw new java.net.URISyntaxException(value, "Missing protocol");
                         }
 
                         if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
-                            AdvancedChatHud.LOGGER.warn("[WindowManager] Blocked URL with unsupported protocol: " + scheme);
                             throw new java.net.URISyntaxException(value, "Unsupported protocol: " + scheme);
                         }
 
                         // Use Minecraft's Util class to open URL safely
-                        AdvancedChatHud.LOGGER.info("[WindowManager] Opening URL: " + uri);
                         net.minecraft.util.Util.getOperatingSystem().open(uri);
                         return true;
                     } catch (Exception e) {
@@ -629,17 +606,13 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
 
                 case RUN_COMMAND:
                     // Run command (starts with /)
-                    AdvancedChatHud.LOGGER.info("[WindowManager] RUN_COMMAND - value: " + value + ", screen: " + (screen != null ? screen.getClass().getSimpleName() : "null"));
                     if (client.player != null) {
                         String command = value.startsWith("/") ? value.substring(1) : value;
-                        AdvancedChatHud.LOGGER.info("[WindowManager] Sending command: " + command);
                         client.player.networkHandler.sendChatCommand(command);
                         // Close the chat screen if it's open
                         if (screen instanceof AdvancedChatScreen) {
                             client.setScreen(null);
                         }
-                    } else {
-                        AdvancedChatHud.LOGGER.warn("[WindowManager] Client player is null, cannot send command");
                     }
                     return true;
 
