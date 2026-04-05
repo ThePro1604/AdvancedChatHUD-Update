@@ -33,7 +33,7 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
 
     private TextFieldWrapper<GuiTextFieldGeneric> name;
     private List<TextFieldWrapper<GuiTextFieldGeneric>> texts;
-    private GuiTextFieldGeneric nameField;
+    private GuiTextFieldGeneric nameField;  // Keep reference for save() method
     private ConfigOptionList findType =
             new ConfigOptionList(
                     "advancedchathud.config.match.findtype",
@@ -63,7 +63,7 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
         }
         pos -= removeWidth;
         int findWidth = getFindTypeWidth();
-        int nameWidth = width - findWidth - removeWidth;
+        int nameWidth = width - findWidth - removeWidth - 10;  // Added -10 for padding
         this.findType.setOptionListValue(entry.getFindType());
         ConfigButtonOptionList findType =
                 new ConfigButtonOptionList(pos - findWidth, y, findWidth, 20, this.findType);
@@ -75,10 +75,21 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
 
         pos -= findWidth + 1;
         this.nameField = new GuiTextFieldGeneric(pos - nameWidth, y, nameWidth, 20, MinecraftClient.getInstance().textRenderer);
-        this.nameField.setMaxLength(64000);
         this.nameField.setText(entry.getPattern());
-        name = new TextFieldWrapper<>(nameField, new SaveListener(this));
+
+        name = new TextFieldWrapper<>(this.nameField, new SaveListener(this));
+
+        // TextFieldWrapper resets maxLength to 12! Set it back to a high value AFTER wrapper creation
+        this.nameField.setMaxLength(64000);
+
+        // Set a permissive validator that accepts any text (fixes "Invalid Length" tooltip)
+        setPermissiveValidator(this.nameField);
+
+        // Also try to set maxLength on the TextFieldWrapper itself
+        setWrapperMaxLength(name, 64000);
+
         parent.addTextField(name);
+
         texts = new ArrayList<>();
         texts.add(name);
     }
@@ -89,6 +100,49 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
             translations.add(f.getDisplayName());
         }
         return TextUtil.getMaxLengthTranslation(translations) + 10;
+    }
+
+    private static void setPermissiveValidator(GuiTextFieldGeneric field) {
+        try {
+            Class<?> superClazz = field.getClass().getSuperclass();
+            java.lang.reflect.Field validatorField = superClazz.getDeclaredField("field_2104");
+            validatorField.setAccessible(true);
+
+            // Create a permissive validator that accepts any string
+            java.util.function.Predicate<String> permissiveValidator = s -> true;  // Always accept
+            validatorField.set(field, permissiveValidator);
+        } catch (Exception e) {
+            // Silently fail - the field might not exist in all versions
+        }
+    }
+
+    private static void setWrapperMaxLength(TextFieldWrapper<GuiTextFieldGeneric> wrapper, int maxLength) {
+        try {
+            // The TextFieldWrapper has a 'type' field (TextFieldType enum) that controls validation
+            Class<?> wrapperClass = wrapper.getClass();
+            java.lang.reflect.Field typeField = wrapperClass.getDeclaredField("type");
+            typeField.setAccessible(true);
+            Object type = typeField.get(wrapper);
+
+            if (type != null) {
+                // Get the TextFieldType class and update its maxLength field
+                Class<?> typeClass = type.getClass();
+
+                for (java.lang.reflect.Field field : typeClass.getDeclaredFields()) {
+                    field.setAccessible(true);
+
+                    // Set maxLength to a high value to allow long patterns
+                    if ((field.getName().toLowerCase().contains("max") && field.getName().toLowerCase().contains("length"))
+                        || field.getName().equals("maxLength")) {
+                        if (field.getType() == int.class || field.getType() == Integer.class) {
+                            field.set(type, maxLength);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Silently fail - the field might not exist in all versions
+        }
     }
 
     @Override
@@ -104,7 +158,6 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
     }
 
     public void save() {
-        // Access the wrapped text field directly using the stored reference
         entry.setPattern(nameField.getText());
     }
 

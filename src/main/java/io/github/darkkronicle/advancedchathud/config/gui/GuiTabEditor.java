@@ -7,6 +7,7 @@
  */
 package io.github.darkkronicle.advancedchathud.config.gui;
 
+import com.google.common.collect.ImmutableList;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.GuiConfigsBase;
@@ -80,13 +81,13 @@ public class GuiTabEditor extends GuiConfigsBase implements IClosable {
     @Override
     public List<ConfigOptionWrapper> getConfigs() {
         ArrayList<IConfigBase> config = new ArrayList<>();
-        List<SaveableConfig<? extends IConfigBase>> options;
+        ImmutableList<SaveableConfig<?>> options;
         if (main) {
             options = tab.getMainEditableOptions();
         } else {
             options = tab.getOptions();
         }
-        for (SaveableConfig<? extends IConfigBase> s : options) {
+        for (SaveableConfig<?> s : options) {
             config.add(s.config);
         }
 

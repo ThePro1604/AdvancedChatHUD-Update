@@ -14,6 +14,7 @@ import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.GuiTextFieldGeneric;
 import fi.dy.masa.malilib.gui.Message;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
+import fi.dy.masa.malilib.gui.wrappers.TextFieldWrapper;
 import fi.dy.masa.malilib.util.StringUtils;
 import io.github.darkkronicle.advancedchatcore.gui.buttons.NamedSimpleButton;
 import io.github.darkkronicle.advancedchathud.AdvancedChatHud;
@@ -47,18 +48,30 @@ public class SharingScreen extends GuiBase {
         int y = 50;
         text = new GuiTextFieldGeneric(x, y, 300, 20, client.textRenderer);
         y -= 24;
-        text.setMaxLength(12800);
-        if (starting != null) {
-            text.setText(starting);
-            text.setFocused(true);
-        }
+
+        // IMPORTANT: Set maxLength and validator BEFORE creating wrapper
+        // Do NOT set text yet - TextFieldWrapper will crash if text is already set
+        text.setMaxLength(64000);
+        setPermissiveValidator(text);
 
         text.setFocused(true);
         text.setDrawsBackground(true);
         text.setEditable(true);
-        text.setFocused(true);
 
+        // Create wrapper and add the text field (BEFORE setting text!)
+        TextFieldWrapper<GuiTextFieldGeneric> wrapper = new TextFieldWrapper<>(text, null);
         this.addTextField(text, null);
+
+        // Fix character limit again - TextFieldWrapper resets maxLength to 12
+        text.setMaxLength(64000);
+        setPermissiveValidator(text);
+        setWrapperMaxLength(wrapper, 64000);
+
+        // Now it's safe to set the text after wrapper is configured
+        if (starting != null) {
+            text.setText(starting);
+            text.setFocused(true);
+        }
 
         this.addButton(
                 x, y, "advancedchathud.gui.button.import", (button, mouseButton) -> importTab());
@@ -88,5 +101,48 @@ public class SharingScreen extends GuiBase {
 
         clearElements();
         init();
+    }
+
+    private static void setPermissiveValidator(GuiTextFieldGeneric field) {
+        try {
+            Class<?> superClazz = field.getClass().getSuperclass();
+            java.lang.reflect.Field validatorField = superClazz.getDeclaredField("field_2104");
+            validatorField.setAccessible(true);
+
+            // Create a permissive validator that accepts any string
+            java.util.function.Predicate<String> permissiveValidator = s -> true;  // Always accept
+            validatorField.set(field, permissiveValidator);
+        } catch (Exception e) {
+            // Silently fail - the field might not exist in all versions
+        }
+    }
+
+    private static void setWrapperMaxLength(TextFieldWrapper<GuiTextFieldGeneric> wrapper, int maxLength) {
+        try {
+            // The TextFieldWrapper has a 'type' field (TextFieldType enum) that controls validation
+            Class<?> wrapperClass = wrapper.getClass();
+            java.lang.reflect.Field typeField = wrapperClass.getDeclaredField("type");
+            typeField.setAccessible(true);
+            Object type = typeField.get(wrapper);
+
+            if (type != null) {
+                // Get the TextFieldType class and update its maxLength field
+                Class<?> typeClass = type.getClass();
+
+                for (java.lang.reflect.Field field : typeClass.getDeclaredFields()) {
+                    field.setAccessible(true);
+
+                    // Set maxLength to a high value to allow long patterns
+                    if ((field.getName().toLowerCase().contains("max") && field.getName().toLowerCase().contains("length"))
+                        || field.getName().equals("maxLength")) {
+                        if (field.getType() == int.class || field.getType() == Integer.class) {
+                            field.set(type, maxLength);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Silently fail - the field might not exist in all versions
+        }
     }
 }
