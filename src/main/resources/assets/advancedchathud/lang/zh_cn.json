@@ -146,6 +146,7 @@
   "advancedchathud.context.copied": "§a复制§r",
 
   "advancedchathud.context.copy": "复制",
+  "advancedchathud.context.copyhex": "复制（HEX）",
   "advancedchathud.context.delete": "删除",
   "advancedchathud.context.minimalist": "切换极简模式",
   "advancedchathud.context.removeallwindows": "删除所有窗口",

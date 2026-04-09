@@ -26,6 +26,7 @@ import io.github.darkkronicle.advancedchathud.config.HudConfigStorage;
 import io.github.darkkronicle.advancedchathud.itf.IChatHud;
 import io.github.darkkronicle.advancedchathud.tabs.AbstractChatTab;
 import io.github.darkkronicle.advancedchathud.tabs.CustomChatTab;
+import io.github.darkkronicle.advancedchathud.util.TextUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -196,6 +197,11 @@ public class HudSection extends AdvancedChatScreenSection {
             }
             actions.put(Text.literal(StringUtils.translate("advancedchathud.context.copy")), (x, y) -> {
                 MinecraftClient.getInstance().keyboard.setClipboard(message.getOriginalText().getString());
+                InfoUtils.printActionbarMessage("advancedchathud.context.copied");
+            });
+            actions.put(Text.literal(StringUtils.translate("advancedchathud.context.copyhex")), (x, y) -> {
+                String hexText = TextUtil.toStringWithHexColors(message.getOriginalText());
+                MinecraftClient.getInstance().keyboard.setClipboard(hexText);
                 InfoUtils.printActionbarMessage("advancedchathud.context.copied");
             });
             actions.put(Text.literal(StringUtils.translate("advancedchathud.context.delete")), (x, y) -> {

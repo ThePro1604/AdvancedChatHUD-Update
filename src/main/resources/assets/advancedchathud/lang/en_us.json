@@ -146,6 +146,7 @@
   "advancedchathud.context.copied": "§aCopied",
 
   "advancedchathud.context.copy": "Copy",
+  "advancedchathud.context.copyhex": "Copy With HEX",
   "advancedchathud.context.delete": "Delete",
   "advancedchathud.context.minimalist": "Toggle Minimalist",
   "advancedchathud.context.removeallwindows": "Remove All Windows",
