@@ -20,8 +20,8 @@ import io.github.darkkronicle.advancedchatcore.gui.buttons.NamedSimpleButton;
 import io.github.darkkronicle.advancedchathud.AdvancedChatHud;
 import io.github.darkkronicle.advancedchathud.config.ChatTab;
 import io.github.darkkronicle.advancedchathud.config.HudConfigStorage;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 
 /** Screen for importing and exporting {@link ChatTab}. */
 public class SharingScreen extends GuiBase {
@@ -46,7 +46,7 @@ public class SharingScreen extends GuiBase {
     public void init() {
         int x = this.width / 2 - 150;
         int y = 50;
-        text = new GuiTextFieldGeneric(x, y, 300, 20, client.textRenderer);
+        text = new GuiTextFieldGeneric(x, y, 300, 20, minecraft.font);
         y -= 24;
 
         // IMPORTANT: Set maxLength and validator BEFORE creating wrapper
@@ -55,10 +55,9 @@ public class SharingScreen extends GuiBase {
         setPermissiveValidator(text);
 
         text.setFocused(true);
-        text.setDrawsBackground(true);
         text.setEditable(true);
 
-        // Create wrapper and add the text field (BEFORE setting text!)
+        // Create wrapper and add the Component field (BEFORE setting text!)
         TextFieldWrapper<GuiTextFieldGeneric> wrapper = new TextFieldWrapper<>(text, null);
         this.addTextField(text, null);
 
@@ -67,9 +66,9 @@ public class SharingScreen extends GuiBase {
         setPermissiveValidator(text);
         setWrapperMaxLength(wrapper, 64000);
 
-        // Now it's safe to set the text after wrapper is configured
+        // Now it's safe to set the Component after wrapper is configured
         if (starting != null) {
-            text.setText(starting);
+            text.setValue(starting);
             text.setFocused(true);
         }
 
@@ -83,7 +82,7 @@ public class SharingScreen extends GuiBase {
 
     public void importTab() {
         ChatTab.ChatTabJsonSave tabSave = new ChatTab.ChatTabJsonSave();
-        ChatTab tab = tabSave.load(new JsonParser().parse(text.getText()).getAsJsonObject());
+        ChatTab tab = tabSave.load(new JsonParser().parse(text.getValue()).getAsJsonObject());
         if (tab == null) {
             throw new NullPointerException("Filter is null!");
         }
@@ -95,7 +94,7 @@ public class SharingScreen extends GuiBase {
                 StringUtils.translate("advancedchat.gui.message.successful"));
     }
 
-    public void resize(MinecraftClient mc, int width, int height) {
+    public void resize(Minecraft mc, int width, int height) {
         this.width = width;
         this.height = height;
 

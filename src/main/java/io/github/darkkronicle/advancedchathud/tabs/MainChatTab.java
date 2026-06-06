@@ -29,7 +29,7 @@ import io.github.darkkronicle.advancedchathud.config.HudConfigStorage;
 import io.github.darkkronicle.advancedchathud.gui.WindowManager;
 import io.github.darkkronicle.advancedchathud.util.FileUtil;
 import lombok.Getter;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
@@ -85,7 +85,7 @@ public class MainChatTab extends AbstractChatTab {
     }
 
     @Override
-    public boolean shouldAdd(Text text) {
+    public boolean shouldAdd(Component text) {
         return true;
     }
 

@@ -20,8 +20,8 @@ import io.github.darkkronicle.advancedchatcore.util.FindType;
 import io.github.darkkronicle.advancedchathud.AdvancedChatHud;
 import io.github.darkkronicle.advancedchathud.config.ChatTab;
 import io.github.darkkronicle.advancedchathud.config.Match;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 
 public class MatchesEditor extends CoreGuiListBase<Match, WidgetMatchEntry, WidgetListMatches>
         implements IClosable {
@@ -59,7 +59,7 @@ public class MatchesEditor extends CoreGuiListBase<Match, WidgetMatchEntry, Widg
     }
 
     @Override
-    public void resize(MinecraftClient mc, int width, int height) {
+    public void resize(Minecraft mc, int width, int height) {
         this.width = width;
         this.height = height;
 

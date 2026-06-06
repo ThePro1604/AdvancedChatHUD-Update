@@ -17,10 +17,10 @@ import io.github.darkkronicle.advancedchathud.AdvancedChatHud;
 import io.github.darkkronicle.advancedchathud.config.HudConfigStorage;
 import io.github.darkkronicle.advancedchathud.itf.IChatHud;
 import io.github.darkkronicle.advancedchathud.tabs.AbstractChatTab;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
 
 public class TabButton extends CleanButton {
 
@@ -37,7 +37,7 @@ public class TabButton extends CleanButton {
         this.tab = tab;
     }
 
-    public void render(DrawContext drawContext, int mouseX, int mouseY, boolean selected) {
+    public void render(GuiGraphicsExtractor drawContext, int mouseX, int mouseY, boolean selected) {
         int relMX = mouseX - x;
         int relMY = mouseY - y;
         hovered = relMX >= 0 && relMX <= width && relMY >= 0 && relMY <= height;
@@ -62,17 +62,17 @@ public class TabButton extends CleanButton {
         // Use DrawContext directly instead of GuiContext wrapper
         drawContext.fill(x, y, x + width, y + height, color.color());
 
-        drawContext.drawTextWithShadow(mc.textRenderer, displayString, x + PADDING, y + PADDING, selected ? WHITE : GRAY);
+        drawContext.text(mc.font, displayString, x + PADDING, y + PADDING, selected ? WHITE : GRAY, true);
         if (tab.isShowUnread() && tab.getUnread() > 0) {
             String unread = TextUtil.toSuperscript(Math.min(tab.getUnread(), 99));
             int unreadX = x + width - ((UNREAD_WIDTH + PADDING) / 2) - 1;
-            int unreadWidth = mc.textRenderer.getWidth(unread);
-            drawContext.drawTextWithShadow(mc.textRenderer, unread, unreadX - unreadWidth / 2, y + PADDING, RED);
+            int unreadWidth = mc.font.width(unread);
+            drawContext.text(mc.font, unread, unreadX - unreadWidth / 2, y + PADDING, RED, true);
         }
     }
 
     @Override
-    public boolean onMouseClicked(Click click, boolean doubled) {
+    public boolean onMouseClicked(MouseButtonEvent click, boolean doubled) {
         // Check if click is inside button bounds
         int clickX = (int) click.x();
         int clickY = (int) click.y();
@@ -84,7 +84,7 @@ public class TabButton extends CleanButton {
 
         this.mc
                 .getSoundManager()
-                .play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                .play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         WindowManager.getInstance().onTabButton(tab);
         return true;
     }

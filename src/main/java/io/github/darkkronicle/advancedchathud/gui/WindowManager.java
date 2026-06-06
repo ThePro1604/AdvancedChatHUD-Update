@@ -25,10 +25,10 @@ import io.github.darkkronicle.advancedchathud.tabs.CustomChatTab;
 import io.github.darkkronicle.advancedchathud.tabs.MainChatTab;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Style;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Style;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,7 @@ import java.util.List;
 public class WindowManager implements IRenderer, ResolutionEventHandler {
 
     private static final WindowManager INSTANCE = new WindowManager();
-    private final MinecraftClient client;
+    private final Minecraft client;
     private final List<ChatWindow> windows = new ArrayList<>(8);
     private int dragX = 0;
     private int dragY = 0;
@@ -49,7 +49,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
     }
 
     private WindowManager() {
-        client = MinecraftClient.getInstance();
+        client = Minecraft.getInstance();
     }
 
     public void reset() {
@@ -104,10 +104,10 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
         return array;
     }
 
-    public void onRenderGameOverlayPost(DrawContext drawContext) {
+    public void onRenderGameOverlayPost(GuiGraphicsExtractor drawContext, Minecraft mc, float partialTicks) {
         boolean isFocused = isChatFocused();
-        int ticks = client.inGameHud.getTicks();
-        if (!HudConfigStorage.General.RENDER_IN_OTHER_GUI.config.getBooleanValue() && !isFocused && client.currentScreen != null) {
+        int ticks = client.gui.getGuiTicks();
+        if (!HudConfigStorage.General.RENDER_IN_OTHER_GUI.config.getBooleanValue() && !isFocused && client.screen != null) {
             return;
         }
         for (int i = windows.size() - 1; i >= 0; i--) {
@@ -118,17 +118,22 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
         renderHoverTooltip(drawContext);
     }
 
-    private void renderHoverTooltip(DrawContext drawContext) {
-        if (client.currentScreen != null) {
+    // Overload for direct calls from Mixin
+    public void onRenderGameOverlayPost(GuiGraphicsExtractor drawContext) {
+        onRenderGameOverlayPost(drawContext, client, 0.0f);
+    }
+
+    private void renderHoverTooltip(GuiGraphicsExtractor drawContext) {
+        if (client.screen != null) {
             // Don't render tooltips when a screen is open (unless it's the chat screen)
-            if (!(client.currentScreen instanceof io.github.darkkronicle.advancedchatcore.chat.AdvancedChatScreen)) {
+            if (!(client.screen instanceof io.github.darkkronicle.advancedchatcore.chat.AdvancedChatScreen)) {
                 return;
             }
         }
 
         // Get mouse position
-        double mouseX = client.mouse.getX() * (double) client.getWindow().getScaledWidth() / (double) client.getWindow().getWidth();
-        double mouseY = client.mouse.getY() * (double) client.getWindow().getScaledHeight() / (double) client.getWindow().getHeight();
+        double mouseX = client.mouseHandler.xpos() * (double) client.getWindow().getGuiScaledWidth() / (double) client.getWindow().getWidth();
+        double mouseY = client.mouseHandler.ypos() * (double) client.getWindow().getGuiScaledHeight() / (double) client.getWindow().getHeight();
 
         // Find the style at the mouse position
         Style style = getTextIgnoreFocus(mouseX, mouseY);
@@ -141,8 +146,8 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
      * Render hover effect for a style (tooltip for text, item, entity, etc.)
      * This properly handles all hover event types including formatted text, items, and entities
      */
-    private void renderStyleHoverEffect(DrawContext drawContext, Style style, int x, int y) {
-        net.minecraft.text.HoverEvent hoverEvent = style.getHoverEvent();
+    private void renderStyleHoverEffect(GuiGraphicsExtractor drawContext, Style style, int x, int y) {
+        net.minecraft.network.chat.HoverEvent hoverEvent = style.getHoverEvent();
         if (hoverEvent == null) {
             return;
         }
@@ -150,27 +155,27 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
         // HoverEvent in 1.21 is a sealed interface with ShowText, ShowItem, and ShowEntity implementations
         // We need to use reflection to access the obfuscated record component accessors
         try {
-            // Look for comp_XXXX methods that return Text or ItemStack
+            // Look for comp_XXXX methods that return Component or ItemStack
             for (java.lang.reflect.Method method : hoverEvent.getClass().getMethods()) {
                 if (method.getParameterCount() == 0 && method.getName().startsWith("comp_")) {
                     Class<?> returnType = method.getReturnType();
 
-                    // Check if this returns Text (ShowText hover)
-                    if (net.minecraft.text.Text.class.isAssignableFrom(returnType)) {
-                        net.minecraft.text.Text text = (net.minecraft.text.Text) method.invoke(hoverEvent);
+                    // Check if this returns Component (ShowText hover)
+                    if (net.minecraft.network.chat.Component.class.isAssignableFrom(returnType)) {
+                        net.minecraft.network.chat.Component text = (net.minecraft.network.chat.Component) method.invoke(hoverEvent);
                         if (text != null) {
-                            // Split text into lines and render with proper formatting
-                            java.util.List<net.minecraft.text.OrderedText> lines = splitFormattedTextIntoLines(text);
-                            drawContext.drawOrderedTooltip(client.textRenderer, lines, x, y);
+                            // Split Component into lines and render with proper formatting
+                            java.util.List<net.minecraft.util.FormattedCharSequence> lines = splitFormattedTextIntoLines(text);
+                            drawContext.setTooltipForNextFrame(client.font, lines, x, y);
                         }
                         return;
                     }
 
                     // Check if this returns ItemStack (ShowItem hover)
-                    if (net.minecraft.item.ItemStack.class.isAssignableFrom(returnType)) {
-                        net.minecraft.item.ItemStack itemStack = (net.minecraft.item.ItemStack) method.invoke(hoverEvent);
+                    if (net.minecraft.world.item.ItemStack.class.isAssignableFrom(returnType)) {
+                        net.minecraft.world.item.ItemStack itemStack = (net.minecraft.world.item.ItemStack) method.invoke(hoverEvent);
                         if (itemStack != null) {
-                            drawContext.drawItemTooltip(client.textRenderer, itemStack, x, y);
+                            drawContext.setTooltipForNextFrame(client.font, itemStack, x, y);
                         }
                         return;
                     }
@@ -182,29 +187,29 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
     }
 
     /**
-     * Split formatted Text into lines while preserving all formatting (colors, bold, etc.)
+     * Split formatted Component into lines while preserving all formatting (colors, bold, etc.)
      */
-    private java.util.List<net.minecraft.text.OrderedText> splitFormattedTextIntoLines(net.minecraft.text.Text text) {
-        java.util.List<net.minecraft.text.OrderedText> result = new java.util.ArrayList<>();
-        java.util.List<net.minecraft.text.Text> textLines = new java.util.ArrayList<>();
+    private java.util.List<net.minecraft.util.FormattedCharSequence> splitFormattedTextIntoLines(net.minecraft.network.chat.Component text) {
+        java.util.List<net.minecraft.util.FormattedCharSequence> result = new java.util.ArrayList<>();
+        java.util.List<net.minecraft.network.chat.Component> textLines = new java.util.ArrayList<>();
 
-        // Recursively split the text by newlines while preserving formatting
-        splitTextRecursive(text, textLines, net.minecraft.text.Text.empty());
+        // Recursively split the Component by newlines while preserving formatting
+        splitTextRecursive(text, textLines, net.minecraft.network.chat.Component.empty());
 
-        // Convert each Text line to OrderedText
-        for (net.minecraft.text.Text line : textLines) {
-            result.add(line.asOrderedText());
+        // Convert each Component line to FormattedCharSequence
+        for (net.minecraft.network.chat.Component line : textLines) {
+            result.add(line.getVisualOrderText());
         }
 
         return result;
     }
 
     /**
-     * Recursively process Text and split by newlines while preserving all formatting
+     * Recursively process Component and split by newlines while preserving all formatting
      */
-    private void splitTextRecursive(net.minecraft.text.Text text, java.util.List<net.minecraft.text.Text> lines,
-                                     net.minecraft.text.MutableText currentLine) {
-        // Visit each text component
+    private void splitTextRecursive(net.minecraft.network.chat.Component text, java.util.List<net.minecraft.network.chat.Component> lines,
+                                     net.minecraft.network.chat.MutableComponent currentLine) {
+        // Visit each Component component
         text.visit((style, str) -> {
             if (str.contains("\n")) {
                 // Split by newlines
@@ -214,14 +219,14 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                         // Finish current line and start new one
                         lines.add(currentLine.copy());
                         currentLine.getSiblings().clear();
-                        currentLine.setStyle(net.minecraft.text.Style.EMPTY);
+                        currentLine.setStyle(net.minecraft.network.chat.Style.EMPTY);
                     }
                     if (!parts[i].isEmpty()) {
-                        currentLine.append(net.minecraft.text.Text.literal(parts[i]).setStyle(style));
+                        currentLine.append(net.minecraft.network.chat.Component.literal(parts[i]).setStyle(style));
                     }
                 }
             } else {
-                currentLine.append(net.minecraft.text.Text.literal(str).setStyle(style));
+                currentLine.append(net.minecraft.network.chat.Component.literal(str).setStyle(style));
             }
             return java.util.Optional.empty();
         }, text.getStyle());
@@ -233,7 +238,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
     }
 
     /**
-     * Get text at position without requiring chat to be focused
+     * Get Component at position without requiring chat to be focused
      */
     private Style getTextIgnoreFocus(double mouseX, double mouseY) {
         for (ChatWindow w : windows) {
@@ -286,7 +291,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
     }
 
     public boolean isChatFocused() {
-        return this.client.currentScreen instanceof AdvancedChatScreen;
+        return this.client.screen instanceof AdvancedChatScreen;
     }
 
     public ChatWindow getSelected() {
@@ -311,14 +316,14 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
         windows.removeIf(w -> w == window);
         windows.add(0, window);
 
-        if (!HudConfigStorage.General.CHANGE_START_MESSAGE.config.getBooleanValue() || !(client.currentScreen instanceof AdvancedChatScreen screen)) {
+        if (!HudConfigStorage.General.CHANGE_START_MESSAGE.config.getBooleanValue() || !(client.screen instanceof AdvancedChatScreen screen)) {
             return;
         }
         if (window.getTab() instanceof MainChatTab) {
             for (ChatWindow w : windows) {
                 if (w.getTab() instanceof CustomChatTab tab2) {
-                    if (screen.getChatField().getText().startsWith(tab2.getStartingMessage()) && tab2.getStartingMessage().length() > 0) {
-                        screen.getChatField().setText(screen.getChatField().getText().substring(tab2.getStartingMessage().length()));
+                    if (screen.getChatField().getValue().startsWith(tab2.getStartingMessage()) && tab2.getStartingMessage().length() > 0) {
+                        screen.getChatField().setValue(screen.getChatField().getValue().substring(tab2.getStartingMessage().length()));
                         break;
                     }
                 }
@@ -328,8 +333,8 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
 
             for (ChatWindow w : windows) {
                 if (w.getTab() instanceof CustomChatTab tab2) {
-                    if (screen.getChatField().getText().startsWith(tab2.getStartingMessage()) && tab2.getStartingMessage().length() > 0) {
-                        screen.getChatField().setText(tab.getStartingMessage() + screen.getChatField().getText().substring(tab2.getStartingMessage().length()));
+                    if (screen.getChatField().getValue().startsWith(tab2.getStartingMessage()) && tab2.getStartingMessage().length() > 0) {
+                        screen.getChatField().setValue(tab.getStartingMessage() + screen.getChatField().getValue().substring(tab2.getStartingMessage().length()));
 
                         replaced = true;
 
@@ -339,7 +344,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
             }
 
             if (!replaced) {
-                screen.getChatField().setText(tab.getStartingMessage() + screen.getChatField().getText());
+                screen.getChatField().setValue(tab.getStartingMessage() + screen.getChatField().getValue());
             }
         }
     }
@@ -375,7 +380,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                 return true;
             }
             Style style = over.getText(mouseX, mouseY);
-            // Handle text click - open URLs, run commands, etc.
+            // Handle Component click - open URLs, run commands, etc.
             if (style != null) {
                 if (handleStyleClick(style, screen)) {
                     return true;
@@ -398,8 +403,8 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
         if (drag != null && !resize) {
             int x = Math.max((int) mouseX - dragX, 0);
             int y = Math.max((int) mouseY - dragY, drag.getActualHeight());
-            x = Math.min(x, client.getWindow().getScaledWidth() - drag.getConvertedWidth());
-            y = Math.min(y, client.getWindow().getScaledHeight());
+            x = Math.min(x, client.getWindow().getGuiScaledWidth() - drag.getConvertedWidth());
+            y = Math.min(y, client.getWindow().getGuiScaledHeight());
             drag.setPosition(x, y);
             return true;
         } else if (drag != null) {
@@ -499,7 +504,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
     }
 
     public ChatWindow getHovered(int x, int y) {
-        int windowHeight = client.getWindow().getScaledHeight();
+        int windowHeight = client.getWindow().getGuiScaledHeight();
         for (ChatWindow w : windows) {
             int wX = w.getConvertedX();
             int wY = w.getConvertedY();
@@ -523,14 +528,14 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
             return false;
         }
 
-        net.minecraft.text.ClickEvent clickEvent = style.getClickEvent();
+        net.minecraft.network.chat.ClickEvent clickEvent = style.getClickEvent();
         if (clickEvent == null) {
             return false;
         }
 
         // Use reflection to get the value since the API uses obfuscated method names in Minecraft 1.21.11
         try {
-            net.minecraft.text.ClickEvent.Action action = clickEvent.getAction();
+            net.minecraft.network.chat.ClickEvent.Action action = clickEvent.action();
 
             // Try to get the value - iterate through String-returning methods
             String value = null;
@@ -607,11 +612,11 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                                 // Check if it matches screenshot pattern
                                 if (filename.matches("\\d{4}-\\d{2}-\\d{2}_\\d{2}\\.\\d{2}\\.\\d{2}\\.png")) {
                                     // This is a corrupted screenshot link - find the actual file in screenshots folder
-                                    java.io.File screenshotsDir = new java.io.File(client.runDirectory, "screenshots");
+                                    java.io.File screenshotsDir = new java.io.File(client.gameDirectory, "screenshots");
                                     java.io.File screenshotFile = new java.io.File(screenshotsDir, filename);
 
                                     if (screenshotFile.exists()) {
-                                        net.minecraft.util.Util.getOperatingSystem().open(screenshotFile);
+                                        net.minecraft.util.Util.getPlatform().openFile(screenshotFile);
                                         return true;
                                     }
                                 }
@@ -622,7 +627,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                         if (scheme != null && scheme.equalsIgnoreCase("file")) {
                             // This should be OPEN_FILE action, but handle it gracefully
                             java.io.File file = new java.io.File(uri);
-                            net.minecraft.util.Util.getOperatingSystem().open(file);
+                            net.minecraft.util.Util.getPlatform().openFile(file);
                             return true;
                         }
 
@@ -635,7 +640,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                         }
 
                         // Use Minecraft's Util class to open URL safely
-                        net.minecraft.util.Util.getOperatingSystem().open(uri);
+                        net.minecraft.util.Util.getPlatform().openUri(uri);
                         return true;
                     } catch (Exception e) {
                         AdvancedChatHud.LOGGER.error("Failed to open URL: " + value, e);
@@ -660,7 +665,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                         }
 
                         // Open the file with the system default application
-                        net.minecraft.util.Util.getOperatingSystem().open(file);
+                        net.minecraft.util.Util.getPlatform().openFile(file);
                         return true;
                     } catch (Exception e) {
                         AdvancedChatHud.LOGGER.error("Failed to open file: " + value, e);
@@ -671,7 +676,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                     // Run command (starts with /)
                     if (client.player != null) {
                         String command = value.startsWith("/") ? value.substring(1) : value;
-                        client.player.networkHandler.sendChatCommand(command);
+                        client.player.connection.sendCommand(command);
                         // Close the chat screen if it's open
                         if (screen instanceof AdvancedChatScreen) {
                             client.setScreen(null);
@@ -682,7 +687,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                 case SUGGEST_COMMAND:
                     // Suggest command in chat field - open chat if not already open
                     if (screen instanceof AdvancedChatScreen chatScreen) {
-                        chatScreen.getChatField().setText(value);
+                        chatScreen.getChatField().setValue(value);
                     } else {
                         // Open chat screen with the suggested command
                         client.setScreen(new AdvancedChatScreen(value));
@@ -694,8 +699,8 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                     return false;
 
                 case COPY_TO_CLIPBOARD:
-                    // Copy text to clipboard
-                    client.keyboard.setClipboard(value);
+                    // Copy Component to clipboard
+                    client.keyboardHandler.setClipboard(value);
                     return true;
             }
         } catch (Exception e) {

@@ -51,7 +51,8 @@ public class HudInitHandler implements IInitializationHandler {
         ChatHistory.getInstance().addOnClear(() -> WindowManager.getInstance().clear());
         ChatHistory.getInstance().addOnClear(() -> HudChatMessageHolder.getInstance().clear());
         ChatHistory.getInstance().addOnUpdate(HudChatMessageHolder.getInstance());
-        RenderEventHandler.getInstance().registerGameOverlayRenderer(WindowManager.getInstance());
+        // Rendering is now handled by MixinInGameHud instead of MaLiLib's RenderEventHandler
+        // RenderEventHandler.getInstance().registerGameOverlayRenderer(WindowManager.getInstance());
         ResolutionEventHandler.ON_RESOLUTION_CHANGE.add(WindowManager.getInstance());
     }
 }

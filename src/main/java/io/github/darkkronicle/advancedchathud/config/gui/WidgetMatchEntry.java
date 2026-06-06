@@ -22,8 +22,8 @@ import io.github.darkkronicle.advancedchatcore.util.TextUtil;
 import io.github.darkkronicle.advancedchathud.config.Match;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,15 +74,15 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
                 });
 
         pos -= findWidth + 1;
-        this.nameField = new GuiTextFieldGeneric(pos - nameWidth, y, nameWidth, 20, MinecraftClient.getInstance().textRenderer);
-        this.nameField.setText(entry.getPattern());
+        this.nameField = new GuiTextFieldGeneric(pos - nameWidth, y, nameWidth, 20, Minecraft.getInstance().font);
+        this.nameField.setValue(entry.getPattern());
 
         name = new TextFieldWrapper<>(this.nameField, new SaveListener(this));
 
         // TextFieldWrapper resets maxLength to 12! Set it back to a high value AFTER wrapper creation
         this.nameField.setMaxLength(64000);
 
-        // Set a permissive validator that accepts any text (fixes "Invalid Length" tooltip)
+        // Set a permissive validator that accepts any Component (fixes "Invalid Length" tooltip)
         setPermissiveValidator(this.nameField);
 
         // Also try to set maxLength on the TextFieldWrapper itself
@@ -150,7 +150,7 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
         return texts;
     }
 
-    public void renderEntry(int mouseX, int mouseY, boolean selected, DrawContext drawContext) {}
+    public void renderEntry(int mouseX, int mouseY, boolean selected, GuiGraphicsExtractor drawContext) {}
 
     @Override
     public String getName() {
@@ -158,7 +158,7 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
     }
 
     public void save() {
-        entry.setPattern(nameField.getText());
+        entry.setPattern(nameField.getValue());
     }
 
     private static class SaveListener implements ITextFieldListener<GuiTextFieldGeneric> {
@@ -171,7 +171,7 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
 
         @Override
         public boolean onTextChange(GuiTextFieldGeneric textField) {
-            parent.entry.setPattern(textField.getText());
+            parent.entry.setPattern(textField.getValue());
             return false;
         }
     }

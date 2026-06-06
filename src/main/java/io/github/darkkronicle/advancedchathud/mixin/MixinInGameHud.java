@@ -10,22 +10,22 @@ package io.github.darkkronicle.advancedchathud.mixin;
 import io.github.darkkronicle.advancedchathud.gui.WindowManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.DeltaTracker;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(InGameHud.class)
+@Mixin(Gui.class)
 @Environment(EnvType.CLIENT)
 public class MixinInGameHud {
 
-    @Inject(at = @At("TAIL"), method = "render")
-    private void onRenderHud(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "extractRenderState")
+    private void onRenderHud(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         // Render chat windows after all other HUD elements
-        WindowManager.getInstance().onRenderGameOverlayPost(context);
+        WindowManager.getInstance().onRenderGameOverlayPost(graphics);
     }
 }
 

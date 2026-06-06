@@ -10,45 +10,45 @@ package io.github.darkkronicle.advancedchathud.util;
 import lombok.experimental.UtilityClass;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.ChatFormatting;
 
 import java.util.Optional;
 
 /**
- * Utility class for text manipulation and conversion.
+ * Utility class for Component manipulation and conversion.
  */
 @UtilityClass
 @Environment(EnvType.CLIENT)
 public class TextUtil {
 
     /**
-     * Converts a Minecraft Text object to a string with HEX color codes.
+     * Converts a Minecraft Component object to a string with HEX color codes.
      * This preserves all color information including custom colors, ranks, nicknames, etc.
      *
-     * @param text The Text object to convert
+     * @param Component The Component object to convert
      * @return A string with HEX color codes in the format &#RRGGBB and formatting codes like &l, &o, etc.
      */
-    public static String toStringWithHexColors(Text text) {
+    public static String toStringWithHexColors(Component text) {
         if (text == null) {
             return "";
         }
-        
+
         StringBuilder result = new StringBuilder();
-        
+
         // Visit all text components and build the formatted string
         text.visit((style, content) -> {
             // Append color code if present
             appendStyleCodes(result, style);
-            
+
             // Append the actual text content
             result.append(content);
-            
+
             return Optional.empty();
         }, text.getStyle());
-        
+
         return result.toString();
     }
     
@@ -67,7 +67,7 @@ public class TextUtil {
         TextColor color = style.getColor();
         if (color != null) {
             // Convert color to HEX format with & prefix (e.g., &#FF5555)
-            int rgb = color.getRgb();
+            int rgb = color.getValue();
             builder.append(String.format("&#%06X", rgb & 0xFFFFFF));
         }
 
@@ -90,33 +90,33 @@ public class TextUtil {
     }
     
     /**
-     * Converts a Minecraft Text object to a string with both HEX color codes and legacy formatting codes.
-     * This is a more compatible version that includes both modern hex colors and legacy formatting.
+     * Converts a Minecraft Component object to a string with both HEX color codes and legacy formatting codes.
+     * This is a more compatible version that includes both modern hex colors and legacy ChatFormatting.
      * 
-     * @param text The Text object to convert
+     * @param Component The Component object to convert
      * @return A string with HEX color codes and formatting codes
      */
-    public static String toStringWithHexColorsAndFormatting(Text text) {
+    public static String toStringWithHexColorsAndFormatting(Component text) {
         if (text == null) {
             return "";
         }
-        
+
         StringBuilder result = new StringBuilder();
         Style previousStyle = Style.EMPTY;
-        
+
         // Visit all text components and build the formatted string
         text.visit((style, content) -> {
             // Only add formatting if style changed
             if (!style.equals(previousStyle)) {
                 appendFormattingCodesIfNeeded(result, style);
             }
-            
+
             // Append the actual text content
             result.append(content);
-            
+
             return Optional.empty();
         }, text.getStyle());
-        
+
         return result.toString();
     }
     
@@ -134,7 +134,7 @@ public class TextUtil {
         // Add color first - prefix with &
         TextColor color = style.getColor();
         if (color != null) {
-            int rgb = color.getRgb();
+            int rgb = color.getValue();
             builder.append(String.format("&#%06X", rgb & 0xFFFFFF));
         }
 

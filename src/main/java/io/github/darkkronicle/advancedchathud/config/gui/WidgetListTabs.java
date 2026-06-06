@@ -11,7 +11,7 @@ import fi.dy.masa.malilib.gui.interfaces.ISelectionListener;
 import io.github.darkkronicle.advancedchatcore.gui.WidgetConfigList;
 import io.github.darkkronicle.advancedchathud.config.ChatTab;
 import io.github.darkkronicle.advancedchathud.config.HudConfigStorage;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.util.ArrayList;
 import java.util.Collection;

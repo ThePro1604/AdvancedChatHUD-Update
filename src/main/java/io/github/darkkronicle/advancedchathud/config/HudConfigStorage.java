@@ -32,7 +32,7 @@ import io.github.darkkronicle.advancedchathud.tabs.MainChatTab;
 import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -414,10 +414,11 @@ public class HudConfigStorage implements IConfigHandler {
         }
 
         Visibility(String configString) {
+            // Sprite ID — texture at assets/advancedchathud/textures/gui/sprites/chatwindow/<name>.png
             this.texture =
-                    Identifier.of(
+                    Identifier.fromNamespaceAndPath(
                             AdvancedChatHud.MOD_ID,
-                            "textures/gui/chatwindow/" + configString + ".png");
+                            "chatwindow/" + configString);
             this.configString = configString;
         }
 

@@ -23,7 +23,7 @@ import io.github.darkkronicle.advancedchathud.config.ChatTab;
 import io.github.darkkronicle.advancedchathud.config.Match;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,7 +92,7 @@ public class CustomChatTab extends AbstractChatTab {
     }
 
     @Override
-    public boolean shouldAdd(Text text) {
+    public boolean shouldAdd(Component text) {
         String search = text.getString();
         ParseContext context = AdvancedChatHud.MAIN_CHAT_TAB.getProcessor().createContext();
         Result result = function.parse(context, List.of(new Node() {

@@ -1,15 +1,15 @@
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 	id 'io.freefair.lombok' version '8.10'
 }
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(25)
 	}
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 base {
@@ -28,33 +28,21 @@ repositories {
 	maven { url 'https://masa.dy.fi/maven' }
 	maven { url 'https://jitpack.io' }
 	maven { url 'https://maven.fallenbreath.me/releases' }
-	maven {
-		url = uri("https://maven.pkg.github.com/Arematics/AdvancedChatCore")
-		credentials {
-			username = findProperty("gpr.user")?.toString() ?: System.getenv("GITHUB_ACTOR")
-			password = findProperty("gpr.key")?.toString()  ?: System.getenv("GITHUB_TOKEN")
-		}
-	}
-	maven {
-		url = uri("https://maven.pkg.github.com/ThePro1604/AdvancedChatCore-Update")
-		credentials {
-			username = findProperty("gpr.user")?.toString() ?: System.getenv("GITHUB_ACTOR")
-			password = findProperty("gpr.key")?.toString()  ?: System.getenv("GITHUB_TOKEN")
-		}
-	}
 }
 
 dependencies {
-	compileOnly("org.projectlombok:lombok:1.18.34")
-	annotationProcessor("org.projectlombok:lombok:1.18.34")
+	compileOnly("org.projectlombok:lombok:1.18.46")
+	annotationProcessor("org.projectlombok:lombok:1.18.46")
 
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-	modImplementation "com.github.sakura-ryoko:malilib:${project.malilib_version}"
-	modImplementation "com.arematics:advancedchatcore:${project.minecraft_version}-${project.advancedchat_version}"
-	modImplementation 'com.github.DarkKronicle.Konstruct:core:2.0.3-build1'
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	implementation "com.github.sakura-ryoko:malilib:${project.malilib_version}"
+	// Download AdvancedChatCore-Update-26.1.2-2.1.jar from:
+	// https://github.com/ThePro1604/AdvancedChatCore-Update/releases/download/v26.1-2.1/AdvancedChatCore-Update-26.1.2-2.1.jar
+	// and place it in the libs/ directory
+	implementation fileTree(dir: 'libs', include: ['*.jar'])
+	implementation 'com.github.DarkKronicle.Konstruct:core:2.0.3-build1'
 }
 
 processResources {
@@ -67,7 +55,7 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = "UTF-8"
-	it.options.release = 21
+	it.options.release = 25
 }
 
 tasks.register('sourcesJar', Jar) {
