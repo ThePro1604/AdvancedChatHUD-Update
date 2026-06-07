@@ -144,46 +144,9 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
 
     /**
      * Render hover effect for a style (tooltip for text, item, entity, etc.)
-     * This properly handles all hover event types including formatted text, items, and entities
      */
     private void renderStyleHoverEffect(GuiGraphicsExtractor drawContext, Style style, int x, int y) {
-        net.minecraft.network.chat.HoverEvent hoverEvent = style.getHoverEvent();
-        if (hoverEvent == null) {
-            return;
-        }
-
-        // HoverEvent in 1.21 is a sealed interface with ShowText, ShowItem, and ShowEntity implementations
-        // We need to use reflection to access the obfuscated record component accessors
-        try {
-            // Look for comp_XXXX methods that return Component or ItemStack
-            for (java.lang.reflect.Method method : hoverEvent.getClass().getMethods()) {
-                if (method.getParameterCount() == 0 && method.getName().startsWith("comp_")) {
-                    Class<?> returnType = method.getReturnType();
-
-                    // Check if this returns Component (ShowText hover)
-                    if (net.minecraft.network.chat.Component.class.isAssignableFrom(returnType)) {
-                        net.minecraft.network.chat.Component text = (net.minecraft.network.chat.Component) method.invoke(hoverEvent);
-                        if (text != null) {
-                            // Split Component into lines and render with proper formatting
-                            java.util.List<net.minecraft.util.FormattedCharSequence> lines = splitFormattedTextIntoLines(text);
-                            drawContext.setTooltipForNextFrame(client.font, lines, x, y);
-                        }
-                        return;
-                    }
-
-                    // Check if this returns ItemStack (ShowItem hover)
-                    if (net.minecraft.world.item.ItemStack.class.isAssignableFrom(returnType)) {
-                        net.minecraft.world.item.ItemStack itemStack = (net.minecraft.world.item.ItemStack) method.invoke(hoverEvent);
-                        if (itemStack != null) {
-                            drawContext.setTooltipForNextFrame(client.font, itemStack, x, y);
-                        }
-                        return;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            AdvancedChatHud.LOGGER.error("[WindowManager] Failed to render hover tooltip: " + e.getMessage(), e);
-        }
+        io.github.darkkronicle.advancedchatcore.util.ChatHudHelper.renderHoverTooltip(drawContext, style, x, y);
     }
 
     /**
@@ -521,190 +484,64 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
 
     /**
      * Handle clicking on a style (for URLs, commands, etc.)
-     * Reimplements Screen.handleTextClick functionality for Minecraft 1.21.11
+     * Uses 26.1 sealed ClickEvent interface with direct instanceof dispatch.
      */
     private boolean handleStyleClick(Style style, Screen screen) {
         if (style == null) {
             return false;
         }
-
-        net.minecraft.network.chat.ClickEvent clickEvent = style.getClickEvent();
-        if (clickEvent == null) {
+        net.minecraft.network.chat.ClickEvent event = style.getClickEvent();
+        if (event == null) {
             return false;
         }
 
-        // Use reflection to get the value since the API uses obfuscated method names in Minecraft 1.21.11
-        try {
-            net.minecraft.network.chat.ClickEvent.Action action = clickEvent.action();
-
-            // Try to get the value - iterate through String-returning methods
-            String value = null;
-            Object rawValue = null;
-
-
-
-            // Try all methods with no parameters to find the value accessor
-            // For different actions, the value might be String (RUN_COMMAND) or URI (OPEN_URL/OPEN_FILE)
-            for (java.lang.reflect.Method method : clickEvent.getClass().getMethods()) {
-                if (method.getParameterCount() == 0) {
-                    String methodName = method.getName();
-                    Class<?> returnType = method.getReturnType();
-
-                    // Look for comp_XXXX methods or methods with "value" in the name
-                    if (methodName.startsWith("comp_") || methodName.toLowerCase().contains("value")) {
-                        try {
-                            Object result = method.invoke(clickEvent);
-                            if (result != null) {
-                                rawValue = result;
-                                // Convert to String based on the type
-                                if (result instanceof String) {
-                                    value = (String) result;
-                                } else if (result instanceof java.net.URI) {
-                                    // For URI, preserve the full URI string for later processing
-                                    value = result.toString();
-                                } else {
-                                    value = result.toString();
-                                }
-
-                                if (!value.isEmpty()) {
-                                    break;
-                                }
-                            }
-                        } catch (Exception ex) {
-                            // Continue trying other methods
+        if (event instanceof net.minecraft.network.chat.ClickEvent.RunCommand cmd) {
+            String command = cmd.command();
+            if (command.startsWith("/")) command = command.substring(1);
+            if (client.player != null && client.player.connection != null) {
+                client.player.connection.sendCommand(command);
+            }
+            if (screen instanceof AdvancedChatScreen) {
+                client.setScreen(null);
+            }
+            return true;
+        } else if (event instanceof net.minecraft.network.chat.ClickEvent.OpenUrl openUrl) {
+            java.net.URI uri = openUrl.uri();
+            String scheme = uri.getScheme();
+            // Screenshot workaround: https://YYYY-MM-DD_HH.MM.SS.png was corrupted from a file URI
+            if ("https".equalsIgnoreCase(scheme)) {
+                String uriStr = uri.toString();
+                if (uriStr.startsWith("https://") && uriStr.endsWith(".png")) {
+                    String filename = uriStr.substring(8);
+                    if (filename.matches("\\d{4}-\\d{2}-\\d{2}_\\d{2}\\.\\d{2}\\.\\d{2}\\.png")) {
+                        java.io.File screenshotFile = new java.io.File(
+                                new java.io.File(client.gameDirectory, "screenshots"), filename);
+                        if (screenshotFile.exists()) {
+                            net.minecraft.util.Util.getPlatform().openFile(screenshotFile);
+                            return true;
                         }
                     }
                 }
             }
-
-            if (value == null || value.isEmpty()) {
-                return false;
+            if ("file".equalsIgnoreCase(scheme)) {
+                net.minecraft.util.Util.getPlatform().openFile(new java.io.File(uri));
+                return true;
             }
-
-            switch (action) {
-                case OPEN_URL:
-                    // Open URL in browser (http/https only)
-                    try {
-                        java.net.URI uri;
-
-                        // If rawValue is already a URI object, use it directly
-                        if (rawValue instanceof java.net.URI) {
-                            uri = (java.net.URI) rawValue;
-                        } else {
-                            uri = new java.net.URI(value);
-                        }
-
-                        String scheme = uri.getScheme();
-                        String uriString = uri.toString();
-
-                        // WORKAROUND: Detect screenshot filenames that got corrupted into https:// URIs
-                        // Pattern: https://YYYY-MM-DD_HH.MM.SS.png (where the filename became the hostname)
-                        if (scheme != null && scheme.equalsIgnoreCase("https")) {
-                            // The "hostname" in the corrupted URI is actually the filename
-                            // Try to extract it from the URI string
-                            String uriStr = uri.toString();
-
-                            // Pattern: https://2026-04-02_14.40.44.png
-                            // Extract just the filename part after https://
-                            if (uriStr.startsWith("https://") && uriStr.endsWith(".png")) {
-                                String filename = uriStr.substring(8); // Remove "https://"
-
-                                // Check if it matches screenshot pattern
-                                if (filename.matches("\\d{4}-\\d{2}-\\d{2}_\\d{2}\\.\\d{2}\\.\\d{2}\\.png")) {
-                                    // This is a corrupted screenshot link - find the actual file in screenshots folder
-                                    java.io.File screenshotsDir = new java.io.File(client.gameDirectory, "screenshots");
-                                    java.io.File screenshotFile = new java.io.File(screenshotsDir, filename);
-
-                                    if (screenshotFile.exists()) {
-                                        net.minecraft.util.Util.getPlatform().openFile(screenshotFile);
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-
-                        // Check if this is actually a file:// URI (screenshot case)
-                        if (scheme != null && scheme.equalsIgnoreCase("file")) {
-                            // This should be OPEN_FILE action, but handle it gracefully
-                            java.io.File file = new java.io.File(uri);
-                            net.minecraft.util.Util.getPlatform().openFile(file);
-                            return true;
-                        }
-
-                        if (scheme == null) {
-                            throw new java.net.URISyntaxException(value, "Missing protocol");
-                        }
-
-                        if (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")) {
-                            throw new java.net.URISyntaxException(value, "Unsupported protocol: " + scheme);
-                        }
-
-                        // Use Minecraft's Util class to open URL safely
-                        net.minecraft.util.Util.getPlatform().openUri(uri);
-                        return true;
-                    } catch (Exception e) {
-                        AdvancedChatHud.LOGGER.error("Failed to open URL: " + value, e);
-                    }
-                    break;
-
-                case OPEN_FILE:
-                    // Open file (e.g., screenshots)
-                    try {
-                        java.io.File file;
-
-                        // If rawValue is a URI object, use it
-                        if (rawValue instanceof java.net.URI) {
-                            java.net.URI uri = (java.net.URI) rawValue;
-                            file = new java.io.File(uri);
-                        } else if (value.startsWith("file://")) {
-                            // It's a URI string - convert to File
-                            file = new java.io.File(new java.net.URI(value));
-                        } else {
-                            // It's a direct file path
-                            file = new java.io.File(value);
-                        }
-
-                        // Open the file with the system default application
-                        net.minecraft.util.Util.getPlatform().openFile(file);
-                        return true;
-                    } catch (Exception e) {
-                        AdvancedChatHud.LOGGER.error("Failed to open file: " + value, e);
-                    }
-                    break;
-
-                case RUN_COMMAND:
-                    // Run command (starts with /)
-                    if (client.player != null) {
-                        String command = value.startsWith("/") ? value.substring(1) : value;
-                        client.player.connection.sendCommand(command);
-                        // Close the chat screen if it's open
-                        if (screen instanceof AdvancedChatScreen) {
-                            client.setScreen(null);
-                        }
-                    }
-                    return true;
-
-                case SUGGEST_COMMAND:
-                    // Suggest command in chat field - open chat if not already open
-                    if (screen instanceof AdvancedChatScreen chatScreen) {
-                        chatScreen.getChatField().setValue(value);
-                    } else {
-                        // Open chat screen with the suggested command
-                        client.setScreen(new AdvancedChatScreen(value));
-                    }
-                    return true;
-
-                case CHANGE_PAGE:
-                    // Page changes are handled by book screens, not chat
-                    return false;
-
-                case COPY_TO_CLIPBOARD:
-                    // Copy Component to clipboard
-                    client.keyboardHandler.setClipboard(value);
-                    return true;
+            net.minecraft.util.Util.getPlatform().openUri(uri);
+            return true;
+        } else if (event instanceof net.minecraft.network.chat.ClickEvent.OpenFile openFile) {
+            net.minecraft.util.Util.getPlatform().openFile(openFile.file());
+            return true;
+        } else if (event instanceof net.minecraft.network.chat.ClickEvent.SuggestCommand suggest) {
+            if (screen instanceof AdvancedChatScreen chatScreen) {
+                chatScreen.getChatField().setValue(suggest.command());
+            } else {
+                client.setScreen(new AdvancedChatScreen(suggest.command()));
             }
-        } catch (Exception e) {
-            AdvancedChatHud.LOGGER.error("Failed to handle style click", e);
+            return true;
+        } else if (event instanceof net.minecraft.network.chat.ClickEvent.CopyToClipboard copy) {
+            client.keyboardHandler.setClipboard(copy.value());
+            return true;
         }
 
         return false;

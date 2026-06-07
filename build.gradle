@@ -38,8 +38,8 @@ dependencies {
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 	implementation "com.github.sakura-ryoko:malilib:${project.malilib_version}"
-	// Download AdvancedChatCore-Update-26.1.2-2.1.jar from:
-	// https://github.com/ThePro1604/AdvancedChatCore-Update/releases/download/v26.1-2.1/AdvancedChatCore-Update-26.1.2-2.1.jar
+	// Download AdvancedChatCore-Update-26.1-2.2.jar from:
+	// https://github.com/ThePro1604/AdvancedChatCore-Update/releases/download/v26.1-2.2/AdvancedChatCore-26.1-2.2.jar
 	// and place it in the libs/ directory
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
 	implementation 'com.github.DarkKronicle.Konstruct:core:2.0.3-build1'
