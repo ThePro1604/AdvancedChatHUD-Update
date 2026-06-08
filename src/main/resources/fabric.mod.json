@@ -5,11 +5,14 @@
   "name": "AdvancedChatHUD",
   "description": "A chat HUD overhaul with chat tabs",
   "authors": [
-    "DarkKronicle",
+    "ThePro1604"
+  ],
+  "contributors": [
+    "DarkKronicle (original author)",
     "EnricoMessall"
   ],
   "contact": {
-    "homepage": "https://arematics.com",
+    "homepage": "https://github.com/ThePro1604",
     "sources": "https://github.com/Arematics/AdvancedChatHUD",
     "issues": "https://github.com/Arematics/AdvancedChatHUD/issues"
   },
@@ -18,7 +21,7 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "io.github.darkkronicle.advancedchathud.AdvancedChatHud"
+      "io.github.thepro1604.advancedchathud.AdvancedChatHud"
     ]
   },
   "mixins": [

@@ -1,0 +1,175 @@
+/*
+ * Copyright (C) 2021-2022 thepro1604
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+package io.github.thepro1604.advancedchathud.tabs;
+
+import com.google.gson.JsonArray;
+import fi.dy.masa.malilib.config.options.ConfigColor;
+import fi.dy.masa.malilib.util.FileUtils;
+import fi.dy.masa.malilib.util.StringUtils;
+import io.github.darkkronicle.Konstruct.NodeException;
+import io.github.thepro1604.advancedchatcore.util.Color;
+import io.github.darkkronicle.Konstruct.functions.Function;
+import io.github.darkkronicle.Konstruct.nodes.Node;
+import io.github.darkkronicle.Konstruct.parser.IntRange;
+import io.github.darkkronicle.Konstruct.parser.NodeProcessor;
+import io.github.darkkronicle.Konstruct.parser.ParseContext;
+import io.github.darkkronicle.Konstruct.parser.Result;
+import io.github.darkkronicle.Konstruct.type.NullObject;
+import io.github.thepro1604.advancedchatcore.konstruct.AdvancedChatKonstruct;
+import io.github.thepro1604.advancedchathud.AdvancedChatHud;
+import io.github.thepro1604.advancedchathud.HudChatMessage;
+import io.github.thepro1604.advancedchathud.HudChatMessageHolder;
+import io.github.thepro1604.advancedchathud.config.ChatTab;
+import io.github.thepro1604.advancedchathud.config.HudConfigStorage;
+import io.github.thepro1604.advancedchathud.gui.WindowManager;
+import io.github.thepro1604.advancedchathud.util.FileUtil;
+import lombok.Getter;
+import net.minecraft.network.chat.Component;
+import org.apache.logging.log4j.Level;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+
+/** Main chat tab that manages other chat tabs. */
+public class MainChatTab extends AbstractChatTab {
+
+    @Getter private ArrayList<AbstractChatTab> allChatTabs = new ArrayList<>();
+
+    @Getter private ArrayList<CustomChatTab> customChatTabs = new ArrayList<>();
+
+    public static boolean LOAD_ALL_JSON = false;
+
+    @Getter
+    private NodeProcessor processor = null;
+
+    /** Helper method to convert ConfigColor to Color */
+    private static Color getColor(ConfigColor configColor) {
+        return new Color(StringUtils.getColor(configColor.getStringValue(), 0xFFFFFFFF));
+    }
+
+    public MainChatTab() {
+        super(
+                "Main",
+                HudConfigStorage.MAIN_TAB.getAbbreviation().config.getStringValue(),
+                getColor(HudConfigStorage.MAIN_TAB.getMainColor().config),
+                getColor(HudConfigStorage.MAIN_TAB.getBorderColor().config),
+                getColor(HudConfigStorage.MAIN_TAB.getInnerColor().config),
+                HudConfigStorage.MAIN_TAB.getShowUnread().config.getBooleanValue(),
+                HudConfigStorage.MAIN_TAB.getUuid());
+        setUpTabs();
+    }
+
+    public void refreshOptions() {
+        this.abbreviation = HudConfigStorage.MAIN_TAB.getAbbreviation().config.getStringValue();
+        this.mainColor = getColor(HudConfigStorage.MAIN_TAB.getMainColor().config);
+        this.innerColor = getColor(HudConfigStorage.MAIN_TAB.getInnerColor().config);
+        this.borderColor = getColor(HudConfigStorage.MAIN_TAB.getBorderColor().config);
+        this.showUnread = HudConfigStorage.MAIN_TAB.getShowUnread().config.getBooleanValue();
+        this.uuid = HudConfigStorage.MAIN_TAB.getUuid();
+    }
+
+    public CustomChatTab getCustom(String name) {
+        for (CustomChatTab tab : customChatTabs) {
+            if (tab.getName().equals(name)) {
+                return tab;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean shouldAdd(Component text) {
+        return true;
+    }
+
+    /** Method used for loading in tabs from the config. */
+    public void setUpTabs() {
+        JsonArray windows = null;
+        if (LOAD_ALL_JSON) {
+            windows = WindowManager.getInstance().saveJson();
+        }
+        customChatTabs = new ArrayList<>();
+        allChatTabs = new ArrayList<>();
+        allChatTabs.add(this);
+        for (ChatTab tab : HudConfigStorage.TABS) {
+            CustomChatTab customTab = new CustomChatTab(tab);
+            customChatTabs.add(customTab);
+        }
+        customChatTabs.sort((customTab1, customTab2) -> {
+            Comparator<CustomChatTab> comparator = Comparator.comparingInt(tab -> tab.getTab().getOrder().config.getIntegerValue());
+            int num = comparator.compare(customTab1, customTab2);
+            if (num != 0) {
+                return num;
+            }
+            return customTab1.getTab().getName().config.getStringValue().compareTo(customTab2.getTab().getName().config.getStringValue());
+        });
+        allChatTabs.addAll(customChatTabs);
+
+        Path konstructDir = FileUtils.getConfigDirectoryAsPath().resolve("advancedchat").resolve("konstructTabs");
+        konstructDir.toFile().mkdirs();
+
+        processor = AdvancedChatKonstruct.getInstance().copy();
+        processor.addFunction("getTab", new Function() {
+            @Override
+            public Result parse(ParseContext context, List<Node> input) {
+                CustomChatTab tab = getCustom(Function.parseArgument(context, input, 0).getContent().getString());
+                if (tab == null) {
+                    return Result.success(new NullObject());
+                }
+                return Result.success(new ChatTabObject(tab));
+            }
+
+            @Override
+            public IntRange getArgumentCount() {
+                return IntRange.of(1);
+            }
+        });
+
+        Optional<List<Path>> files = FileUtil.getFilesWithExtensionCaught(konstructDir, ".knst");
+        if (files.isPresent() && files.get().size() != 0) {
+            this.loadKonstruct(files.get());
+        }
+
+        for (HudChatMessage message : HudChatMessageHolder.getInstance().getMessages()) {
+            message.setupTabs(this);
+        }
+        this.refreshOptions();
+        if (windows != null) {
+            WindowManager.getInstance().loadFromJson(windows);
+        }
+    }
+
+    public void loadKonstruct(List<Path> paths) {
+        for (Path path : paths) {
+            try {
+                loadKonstruct(path);
+            } catch (IOException e) {
+                AdvancedChatHud.LOGGER.log(Level.ERROR, "Error reading " + path + ".", e);
+            } catch (NodeException e) {
+                AdvancedChatHud.LOGGER.log(Level.ERROR, "Error setting up konstruct script " + path, e);
+            }
+        }
+    }
+
+    private void loadKonstruct(Path path) throws IOException, NodeException {
+        String contents = String.join("\n", Files.readAllLines(path)).replaceAll("\r", "");
+        Node node = AdvancedChatKonstruct.getInstance().getNode(contents);
+        processor.parse(node);
+    }
+
+    public AbstractChatTab fromUUID(UUID uuid) {
+        for (AbstractChatTab tab : allChatTabs) {
+            if (tab.getUuid().equals(uuid)) {
+                return tab;
+            }
+        }
+        return null;
+    }
+}

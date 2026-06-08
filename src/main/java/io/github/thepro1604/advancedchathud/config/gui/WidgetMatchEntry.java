@@ -1,0 +1,188 @@
+/*
+ * Copyright (C) 2021 thepro1604
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+package io.github.thepro1604.advancedchathud.config.gui;
+
+import fi.dy.masa.malilib.config.options.ConfigOptionList;
+import fi.dy.masa.malilib.gui.GuiTextFieldGeneric;
+import fi.dy.masa.malilib.gui.button.ButtonGeneric;
+import fi.dy.masa.malilib.gui.button.ConfigButtonOptionList;
+import fi.dy.masa.malilib.gui.button.IButtonActionListener;
+import fi.dy.masa.malilib.gui.interfaces.ITextFieldListener;
+import fi.dy.masa.malilib.gui.wrappers.TextFieldWrapper;
+import fi.dy.masa.malilib.util.StringUtils;
+import io.github.thepro1604.advancedchatcore.gui.WidgetConfigListEntry;
+import io.github.thepro1604.advancedchatcore.gui.buttons.NamedSimpleButton;
+import io.github.thepro1604.advancedchatcore.util.FindType;
+import io.github.thepro1604.advancedchatcore.util.TextUtil;
+import io.github.thepro1604.advancedchathud.config.Match;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import fi.dy.masa.malilib.render.GuiContext;
+import net.minecraft.client.Minecraft;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Environment(EnvType.CLIENT)
+public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
+
+    private TextFieldWrapper<GuiTextFieldGeneric> name;
+    private List<TextFieldWrapper<GuiTextFieldGeneric>> texts;
+    private GuiTextFieldGeneric nameField;  // Keep reference for save() method
+    private ConfigOptionList findType =
+            new ConfigOptionList(
+                    "advancedchathud.config.match.findtype",
+                    FindType.LITERAL,
+                    "advancedchathud.config.match.info.findtype");
+
+    public WidgetMatchEntry(
+            int x,
+            int y,
+            int width,
+            int height,
+            boolean isOdd,
+            Match entry,
+            int listIndex,
+            WidgetListMatches parent) {
+        super(x, y, width, height, isOdd, entry, listIndex);
+        y += 1;
+        int pos = x + width - 2;
+
+        int removeWidth = 0;
+        if (listIndex != 0) {
+            // Always want one
+            removeWidth = addButton(pos, y, "advancedchathud.config.match.remove", (button, mouseButton) -> {
+                parent.tab.getMatches().remove(entry);
+                parent.refreshEntries();
+            }) + 1;
+        }
+        pos -= removeWidth;
+        int findWidth = getFindTypeWidth();
+        int nameWidth = width - findWidth - removeWidth - 10;  // Added -10 for padding
+        this.findType.setOptionListValue(entry.getFindType());
+        ConfigButtonOptionList findType =
+                new ConfigButtonOptionList(pos - findWidth, y, findWidth, 20, this.findType);
+        this.addButton(
+                findType,
+                (button, mouseButton) -> {
+                    entry.setFindType((FindType) this.findType.getOptionListValue());
+                });
+
+        pos -= findWidth + 1;
+        this.nameField = new GuiTextFieldGeneric(pos - nameWidth, y, nameWidth, 20, Minecraft.getInstance().font);
+        this.nameField.setValue(entry.getPattern());
+
+        name = new TextFieldWrapper<>(this.nameField, new SaveListener(this));
+
+        // TextFieldWrapper resets maxLength to 12! Set it back to a high value AFTER wrapper creation
+        this.nameField.setMaxLength(64000);
+
+        // Set a permissive validator that accepts any Component (fixes "Invalid Length" tooltip)
+        setPermissiveValidator(this.nameField);
+
+        // Also try to set maxLength on the TextFieldWrapper itself
+        setWrapperMaxLength(name, 64000);
+
+        parent.addTextField(name);
+
+        texts = new ArrayList<>();
+        texts.add(name);
+    }
+
+    private static int getFindTypeWidth() {
+        List<String> translations = new ArrayList<>();
+        for (FindType f : FindType.values()) {
+            translations.add(f.getDisplayName());
+        }
+        return TextUtil.getMaxLengthTranslation(translations) + 10;
+    }
+
+    private static void setPermissiveValidator(GuiTextFieldGeneric field) {
+        try {
+            Class<?> superClazz = field.getClass().getSuperclass();
+            java.lang.reflect.Field validatorField = superClazz.getDeclaredField("field_2104");
+            validatorField.setAccessible(true);
+
+            // Create a permissive validator that accepts any string
+            java.util.function.Predicate<String> permissiveValidator = s -> true;  // Always accept
+            validatorField.set(field, permissiveValidator);
+        } catch (Exception e) {
+            // Silently fail - the field might not exist in all versions
+        }
+    }
+
+    private static void setWrapperMaxLength(TextFieldWrapper<GuiTextFieldGeneric> wrapper, int maxLength) {
+        try {
+            // The TextFieldWrapper has a 'type' field (TextFieldType enum) that controls validation
+            Class<?> wrapperClass = wrapper.getClass();
+            java.lang.reflect.Field typeField = wrapperClass.getDeclaredField("type");
+            typeField.setAccessible(true);
+            Object type = typeField.get(wrapper);
+
+            if (type != null) {
+                // Get the TextFieldType class and update its maxLength field
+                Class<?> typeClass = type.getClass();
+
+                for (java.lang.reflect.Field field : typeClass.getDeclaredFields()) {
+                    field.setAccessible(true);
+
+                    // Set maxLength to a high value to allow long patterns
+                    if ((field.getName().toLowerCase().contains("max") && field.getName().toLowerCase().contains("length"))
+                        || field.getName().equals("maxLength")) {
+                        if (field.getType() == int.class || field.getType() == Integer.class) {
+                            field.set(type, maxLength);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Silently fail - the field might not exist in all versions
+        }
+    }
+
+    @Override
+    public List<TextFieldWrapper<GuiTextFieldGeneric>> getTextFields() {
+        return texts;
+    }
+
+    @Override
+    public void renderEntry(GuiContext context, int mouseX, int mouseY, boolean selected) {
+        // Text fields are rendered via drawTextFields() in the parent render() method
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    public void save() {
+        entry.setPattern(nameField.getValue());
+    }
+
+    private static class SaveListener implements ITextFieldListener<GuiTextFieldGeneric> {
+
+        private final WidgetMatchEntry parent;
+
+        public SaveListener(WidgetMatchEntry parent) {
+            this.parent = parent;
+        }
+
+        @Override
+        public boolean onTextChange(GuiTextFieldGeneric textField) {
+            parent.entry.setPattern(textField.getValue());
+            return false;
+        }
+    }
+
+    protected int addButton(int x, int y, String translation, IButtonActionListener listener) {
+        ButtonGeneric button =
+                new NamedSimpleButton(x, y, StringUtils.translate(translation), false);
+        this.addButton(button, listener);
+        return button.getWidth();
+    }
+}

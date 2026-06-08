@@ -41,7 +41,7 @@ dependencies {
 	// Download AdvancedChatCore-26.1-2.3.jar from:
 	// https://github.com/ThePro1604/AdvancedChatCore-Update/releases/download/v26.1-2.3/AdvancedChatCore-26.1-2.3.jar
 	// and place it in the libs/ directory
-	implementation fileTree(dir: 'libs', include: ['*.jar'])
+	implementation files('../AdvancedChatCore-Update/build/libs/AdvancedChatCore-26.1-2.3.jar')
 	implementation 'com.github.DarkKronicle.Konstruct:core:2.0.3-build1'
 }
 

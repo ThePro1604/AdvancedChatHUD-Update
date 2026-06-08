@@ -1,0 +1,371 @@
+---- Minecraft Crash Report ----
+// There are four lights!
+
+Time: 2026-05-31 20:30:40
+Description: Uploading texture
+
+java.lang.NullPointerException: Uploading texture
+	at java.base/java.util.Objects.requireNonNull(Objects.java:220)
+	at knot//net.minecraft.client.renderer.texture.ReloadableTexture.doLoad(ReloadableTexture.java:41)
+	at knot//net.minecraft.client.renderer.texture.ReloadableTexture.apply(ReloadableTexture.java:34)
+	at knot//net.minecraft.client.renderer.texture.TextureManager.registerAndLoad(TextureManager.java:48)
+	at knot//net.minecraft.client.renderer.texture.TextureManager.getTexture(TextureManager.java:105)
+	at knot//net.minecraft.client.gui.GuiGraphicsExtractor.innerBlit(GuiGraphicsExtractor.java:487)
+	at knot//net.minecraft.client.gui.GuiGraphicsExtractor.blit(GuiGraphicsExtractor.java:325)
+	at knot//io.github.thepro1604.advancedchathud.gui.ChatWindow.drawLine(ChatWindow.java:674)
+	at knot//io.github.thepro1604.advancedchathud.gui.ChatWindow.render(ChatWindow.java:383)
+	at knot//io.github.thepro1604.advancedchathud.gui.WindowManager.onRenderGameOverlayPost(WindowManager.java:114)
+	at knot//io.github.thepro1604.advancedchathud.gui.WindowManager.onRenderGameOverlayPost(WindowManager.java:123)
+	at knot//net.minecraft.client.gui.Gui.handler$zzg000$advancedchathud$onRenderHud(Gui.java:2025)
+	at knot//net.minecraft.client.gui.Gui.extractRenderState$mixinextras$wrapped$172(Gui.java:242)
+	at knot//net.minecraft.client.gui.Gui.mixinextras$bridge$extractRenderState$mixinextras$wrapped$172$173(Gui.java)
+	at knot//net.minecraft.client.gui.Gui.wrapMethod$cid000$iris$handleHudHidingScreens(Gui.java:6541)
+	at knot//net.minecraft.client.gui.Gui.extractRenderState$mixinextras$wrapped$174(Gui.java)
+	at knot//net.minecraft.client.gui.Gui.mixinextras$bridge$extractRenderState$mixinextras$wrapped$174$175(Gui.java)
+	at knot//net.minecraft.client.gui.Gui.wrapMethod$eeo000$zoomify$preventHudRender(Gui.java:8514)
+	at knot//net.minecraft.client.gui.Gui.extractRenderState(Gui.java)
+	at knot//net.minecraft.client.renderer.GameRenderer.extractGui(GameRenderer.java:489)
+	at knot//net.minecraft.client.renderer.GameRenderer.extract(GameRenderer.java:417)
+	at knot//net.minecraft.client.Minecraft.renderFrame$mixinextras$wrapped$402(Minecraft.java:1427)
+	at knot//net.minecraft.client.Minecraft.mixinextras$bridge$renderFrame$mixinextras$wrapped$402$403(Minecraft.java)
+	at knot//net.minecraft.client.Minecraft.wrapMethod$zim000$dynamic_fps_common$renderFrame(Minecraft.java:13184)
+	at knot//net.minecraft.client.Minecraft.renderFrame(Minecraft.java)
+	at knot//net.minecraft.client.Minecraft.runTick(Minecraft.java:1378)
+	at knot//net.minecraft.client.Minecraft.run(Minecraft.java:991)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at java.base/java.util.Objects.requireNonNull(Objects.java:220)
+	at knot//net.minecraft.client.renderer.texture.ReloadableTexture.doLoad(ReloadableTexture.java:41)
+	at knot//net.minecraft.client.renderer.texture.ReloadableTexture.apply(ReloadableTexture.java:34)
+	at knot//net.minecraft.client.renderer.texture.TextureManager.registerAndLoad(TextureManager.java:48)
+	at knot//net.minecraft.client.renderer.texture.TextureManager.getTexture(TextureManager.java:105)
+	at knot//net.minecraft.client.gui.GuiGraphicsExtractor.innerBlit(GuiGraphicsExtractor.java:487)
+	at knot//net.minecraft.client.gui.GuiGraphicsExtractor.blit(GuiGraphicsExtractor.java:325)
+	at knot//io.github.thepro1604.advancedchathud.gui.ChatWindow.drawLine(ChatWindow.java:674)
+	at knot//io.github.thepro1604.advancedchathud.gui.ChatWindow.render(ChatWindow.java:383)
+	at knot//io.github.thepro1604.advancedchathud.gui.WindowManager.onRenderGameOverlayPost(WindowManager.java:114)
+	at knot//io.github.thepro1604.advancedchathud.gui.WindowManager.onRenderGameOverlayPost(WindowManager.java:123)
+	at knot//net.minecraft.client.gui.Gui.handler$zzg000$advancedchathud$onRenderHud(Gui.java:2025)
+	at knot//net.minecraft.client.gui.Gui.extractRenderState$mixinextras$wrapped$172(Gui.java:242)
+	at knot//net.minecraft.client.gui.Gui.mixinextras$bridge$extractRenderState$mixinextras$wrapped$172$173(Gui.java)
+	at knot//net.minecraft.client.gui.Gui.wrapMethod$cid000$iris$handleHudHidingScreens(Gui.java:6541)
+	at knot//net.minecraft.client.gui.Gui.extractRenderState$mixinextras$wrapped$174(Gui.java)
+	at knot//net.minecraft.client.gui.Gui.mixinextras$bridge$extractRenderState$mixinextras$wrapped$174$175(Gui.java)
+	at knot//net.minecraft.client.gui.Gui.wrapMethod$eeo000$zoomify$preventHudRender(Gui.java:8514)
+	at knot//net.minecraft.client.gui.Gui.extractRenderState(Gui.java)
+	at knot//net.minecraft.client.renderer.GameRenderer.extractGui(GameRenderer.java:489)
+	at knot//net.minecraft.client.renderer.GameRenderer.extract(GameRenderer.java:417)
+	at knot//net.minecraft.client.Minecraft.renderFrame$mixinextras$wrapped$402(Minecraft.java:1427)
+	at knot//net.minecraft.client.Minecraft.mixinextras$bridge$renderFrame$mixinextras$wrapped$402$403(Minecraft.java)
+	at knot//net.minecraft.client.Minecraft.wrapMethod$zim000$dynamic_fps_common$renderFrame(Minecraft.java:13184)
+
+-- Uploaded texture --
+Details:
+	Resource location: ~~NULL~~
+	Texture id: ~~NULL~~
+Stacktrace:
+	at knot//net.minecraft.client.renderer.texture.TextureManager.registerAndLoad(TextureManager.java:48)
+	at knot//net.minecraft.client.renderer.texture.TextureManager.getTexture(TextureManager.java:105)
+	at knot//net.minecraft.client.gui.GuiGraphicsExtractor.innerBlit(GuiGraphicsExtractor.java:487)
+	at knot//net.minecraft.client.gui.GuiGraphicsExtractor.blit(GuiGraphicsExtractor.java:325)
+	at knot//io.github.thepro1604.advancedchathud.gui.ChatWindow.drawLine(ChatWindow.java:674)
+	at knot//io.github.thepro1604.advancedchathud.gui.ChatWindow.render(ChatWindow.java:383)
+	at knot//io.github.thepro1604.advancedchathud.gui.WindowManager.onRenderGameOverlayPost(WindowManager.java:114)
+	at knot//io.github.thepro1604.advancedchathud.gui.WindowManager.onRenderGameOverlayPost(WindowManager.java:123)
+	at knot//net.minecraft.client.gui.Gui.handler$zzg000$advancedchathud$onRenderHud(Gui.java:2025)
+	at knot//net.minecraft.client.gui.Gui.extractRenderState$mixinextras$wrapped$172(Gui.java:242)
+	at knot//net.minecraft.client.gui.Gui.mixinextras$bridge$extractRenderState$mixinextras$wrapped$172$173(Gui.java)
+	at knot//net.minecraft.client.gui.Gui.wrapMethod$cid000$iris$handleHudHidingScreens(Gui.java:6541)
+	at knot//net.minecraft.client.gui.Gui.extractRenderState$mixinextras$wrapped$174(Gui.java)
+	at knot//net.minecraft.client.gui.Gui.mixinextras$bridge$extractRenderState$mixinextras$wrapped$174$175(Gui.java)
+	at knot//net.minecraft.client.gui.Gui.wrapMethod$eeo000$zoomify$preventHudRender(Gui.java:8514)
+	at knot//net.minecraft.client.gui.Gui.extractRenderState(Gui.java)
+	at knot//net.minecraft.client.renderer.GameRenderer.extractGui(GameRenderer.java:489)
+	at knot//net.minecraft.client.renderer.GameRenderer.extract(GameRenderer.java:417)
+	at knot//net.minecraft.client.Minecraft.renderFrame$mixinextras$wrapped$402(Minecraft.java:1427)
+	at knot//net.minecraft.client.Minecraft.mixinextras$bridge$renderFrame$mixinextras$wrapped$402$403(Minecraft.java)
+	at knot//net.minecraft.client.Minecraft.wrapMethod$zim000$dynamic_fps_common$renderFrame(Minecraft.java:13184)
+	at knot//net.minecraft.client.Minecraft.renderFrame(Minecraft.java)
+	at knot//net.minecraft.client.Minecraft.runTick(Minecraft.java:1378)
+	at knot//net.minecraft.client.Minecraft.run(Minecraft.java:991)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+
+-- Uptime --
+Details:
+	JVM uptime: 29.017s
+	Wall uptime: 19.162s
+	High-res time: 16.581s
+	Client ticks: 246 ticks / 12.300s
+Stacktrace:
+	at knot//net.minecraft.client.Minecraft.fillReport(Minecraft.java:2529)
+	at knot//net.minecraft.client.Minecraft.emergencySaveAndCrash(Minecraft.java:1047)
+	at knot//net.minecraft.client.Minecraft.run(Minecraft.java:1012)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+
+-- Affected level --
+Details:
+	All players: 1 total; LocalPlayer{name=test1, id=50, pos=(-13.411384896279696, 65.0, 4.528670751036527), mode=SURVIVAL, permission=none}
+	Chunk stats: 529, 329
+	Level dimension: minecraft:overworld
+	Level time: 121604 game time, 121603 day time
+	Level spawn location: World: (0,74,0), Section: (at 0,10,0 in 0,4,0; chunk contains blocks 0,-64,0 to 15,319,15), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,-64,0 to 511,319,511)
+	Server brand: fabric
+	Server type: Integrated singleplayer server
+	Tracked entity count: 105
+	Client weather: Raining: false, thundering: false
+
+-- Last reload --
+Details:
+	Reload number: 1
+	Reload reason: initial
+	Finished: Yes
+	Packs: vanilla, advancedchatcore, advancedchathud, animatica, betterblockentities, bettergrass, bettermounthud, cape-provider, cloth-config, conditional-mixin, config_manager, continuity, controlify, cwb, debugify, dynamic_fps, dynamic_fps_common, e4mc, entity_model_features, entity_texture_features, entityculling, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-language-kotlin, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, fabrishot, fastquit, forgeconfigapiport, immediatelyfast, iris, lambdynlights, lambdynlights_api, languagereload, lithium, malilib, malilib-api, midnightlib, modmenu, morechathistory, moreculling, nochatreports, optigui, paginatedadvancements, placeholder-api, pride, puzzle, reeses-sodium-options, rrls, skyboxify, sodium, sodium-extra, spruceui, sspb, trender, yet_another_config_lib_v3, zoomify, file/SodiumTranslations.zip, file/Chat Reporting Helper.zip, file/Mod Menu Helper.zip, continuity:glass_pane_culling_fix, continuity:default
+
+-- Dynamic Lighting --
+Details:
+	Description: This section contains information related to dynamic lighting, this may not be related to your crash.
+	Mode: fastest
+	Dynamic Light Sources: 0
+	Spatial Hash Occupancy: 0 / 1024
+
+-- System Details --
+Details:
+	Minecraft Version: 26.1.2
+	Minecraft Version ID: 26.1.2
+	Operating System: Windows 11 (amd64) version 10.0
+	Java Version: 25.0.3, Oracle Corporation
+	Java VM Version: Java HotSpot(TM) 64-Bit Server VM (mixed mode, sharing), Oracle Corporation
+	Memory: 699951408 bytes (667 MiB) / 1163919360 bytes (1110 MiB) up to 4294967296 bytes (4096 MiB)
+	Memory (heap): init: 512MiB, used: 440MiB, committed: 1110MiB, max: 4096MiB
+	Memory (non-head): init: 007MiB, used: 272MiB, committed: 275MiB, max: 000MiB
+	CPUs: 20
+	Processor Vendor: GenuineIntel
+	Processor Name: 12th Gen Intel(R) Core(TM) i7-12700
+	Identifier: Intel64 Family 6 Model 151 Stepping 2
+	Microarchitecture: Alder Lake
+	Frequency (GHz): 2.11
+	Number of physical packages: 1
+	Number of physical CPUs: 12
+	Number of logical CPUs: 20
+	Graphics card #0 name: NVIDIA GeForce GTX 1660 Ti
+	Graphics card #0 vendor: NVIDIA
+	Graphics card #0 VRAM (MiB): 6144.00
+	Graphics card #0 deviceId: VideoController1
+	Graphics card #0 versionInfo: 32.0.15.9186
+	Graphics card #1 name: NVIDIA GeForce RTX 2060 SUPER
+	Graphics card #1 vendor: NVIDIA
+	Graphics card #1 VRAM (MiB): 8192.00
+	Graphics card #1 deviceId: VideoController2
+	Graphics card #1 versionInfo: 32.0.15.9186
+	Memory slot #0 capacity (MiB): 32768.00
+	Memory slot #0 clockSpeed (GHz): 2.13
+	Memory slot #0 type: DDR4
+	Memory slot #1 capacity (MiB): 16384.00
+	Memory slot #1 clockSpeed (GHz): 2.13
+	Memory slot #1 type: DDR4
+	Memory slot #2 capacity (MiB): 32768.00
+	Memory slot #2 clockSpeed (GHz): 2.13
+	Memory slot #2 type: DDR4
+	Memory slot #3 capacity (MiB): 16384.00
+	Memory slot #3 clockSpeed (GHz): 2.13
+	Memory slot #3 type: DDR4
+	Virtual memory max (MiB): 104260.86
+	Virtual memory used (MiB): 71229.59
+	Swap memory total (MiB): 6144.00
+	Swap memory used (MiB): 216.60
+	Space in storage for jna.tmpdir (MiB): <path not set>
+	Space in storage for org.lwjgl.system.SharedLibraryExtractPath (MiB): <path not set>
+	Space in storage for io.netty.native.workdir (MiB): <path not set>
+	Space in storage for java.io.tmpdir (MiB): available: 618590.19, total: 948784.88
+	Space in storage for workdir (MiB): available: 618590.19, total: 948784.88
+	JVM Flags: 3 total; -XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump -Xms512m -Xmx4096m
+	Debug Flags: 0 total; 
+	Fabric Mods: 
+		advancedchatcore: AdvancedChatCore 26.1-2.1
+			com_github_thepro1604_konstruct_addons: addons 2.0.3-build1
+			com_github_thepro1604_konstruct_core: core 2.0.3-build1
+			io_github_maowimpl_owo: owo 2.0.0
+			org_apache_commons_commons-csv: commons-csv 1.8
+			org_mariuszgromada_math_mathparser_org-mxparser: MathParser.org-mXparser 4.4.2
+		advancedchathud: AdvancedChatHUD 26.1.2-2.1
+		animatica: Animatica 0.6.1+26.1
+		betterblockentities: BBE 1.3.4+mc26.1.2
+		bettergrass: BetterGrassify 1.8.6+fabric.26.1.2
+		bettermounthud: Better Mount HUD 1.3.0
+		cape-provider: Cape Provider 5.4.0
+		cloth-config: Cloth Config v26.1 26.1.154
+			cloth-basic-math: cloth-basic-math 0.6.1
+		config_manager: Config Manager 1.1.2
+		continuity: Continuity 3.0.1-beta.2+26.1
+		controlify: Controlify 3.0.1+26.1-fabric
+			dev_isxander_libsdl4j: libsdl4j 3.2.18.release-3.2.18-79
+			dev_isxander_steamdeck4j: steamdeck4j 1.1.7
+			org_hid4java_hid4java: hid4java 0.8.0
+		crash_assistant: Crash Assistant 1.11.9
+		cwb: Cubes Without Borders 4.0.5+26.1
+		debugify: Debugify 26.1.2.2
+		dynamic_fps: Dynamic FPS 3.11.6
+			dynamic_fps_common: Dynamic FPS Common 3.11.6
+			net_lostluma_battery: battery 2.0.0
+		e4mc: e4mc 6.1.0+modern
+			folk_sisby_kaleido-config: kaleido-config 0.3.3+1.3.2
+		entity_model_features: Entity Model Features 3.2.4
+		entity_texture_features: Entity Texture Features 7.1
+		entityculling: EntityCulling 1.10.2
+			transition: TRansition 1.0.19
+			trender: TRender 1.0.13
+		fabric-api: Fabric API 0.149.1+26.1.2
+			fabric-api-base: Fabric API Base 2.0.3+ece063234c
+			fabric-api-lookup-api-v1: Fabric API Lookup API (v1) 2.0.11+d5a053b64c
+			fabric-biome-api-v1: Fabric Biome API (v1) 18.0.4+35c80edc4c
+			fabric-block-api-v1: Fabric Block API (v1) 3.0.2+ec56b6014c
+			fabric-block-getter-api-v2: Fabric BlockGetter API (v2) 2.0.6+ec56b6014c
+			fabric-command-api-v2: Fabric Command API (v2) 3.0.5+e2bdee784c
+			fabric-content-registries-v0: Fabric Content Registries (v0) 11.1.1+1a3b26974c
+			fabric-convention-tags-v2: Fabric Convention Tags (v2) 4.6.1+4f11f7994c
+			fabric-crash-report-info-v1: Fabric Crash Report Info (v1) 1.0.3+9f78a5a84c
+			fabric-creative-tab-api-v1: Fabric Creative Tab API (v1) 5.0.11+d871b99e4c
+			fabric-data-attachment-api-v1: Fabric Data Attachment API (v1) 2.2.7+44a0bd1d4c
+			fabric-data-generation-api-v1: Fabric Data Generation API (v1) 24.2.1+73b1f9054c
+			fabric-debug-api-v1: Fabric Debug API (v1) 1.0.1+c792624d4c
+			fabric-dimensions-v1: Fabric Dimensions API (v1) 5.1.5+9cbf5da54c
+			fabric-entity-events-v1: Fabric Entity Events (v1) 5.0.2+e2bdee784c
+			fabric-events-interaction-v0: Fabric Events Interaction (v0) 5.2.1+a67251b84c
+			fabric-game-rule-api-v1: Fabric Game Rule API (v1) 4.0.5+d871b99e4c
+			fabric-item-api-v1: Fabric Item API (v1) 14.1.2+73d134684c
+			fabric-key-mapping-api-v1: Fabric Key Mapping API (v1) 2.0.4+e2bdee784c
+			fabric-lifecycle-events-v1: Fabric Lifecycle Events (v1) 4.1.0+6d50a0854c
+			fabric-loot-api-v3: Fabric Loot API (v3) 3.0.12+00a1fba64c
+			fabric-menu-api-v1: Fabric Menu API (v1) 2.0.13+d871b99e4c
+			fabric-message-api-v1: Fabric Message API (v1) 7.0.5+dae8ce3e4c
+			fabric-model-loading-api-v1: Fabric Model Loading API (v1) 8.0.7+c80601bb4c
+			fabric-networking-api-v1: Fabric Networking API (v1) 6.3.1+554860db4c
+			fabric-object-builder-api-v1: Fabric Object Builder API (v1) 23.0.16+b95dd56e4c
+			fabric-particles-v1: Fabric Particles (v1) 5.0.15+b61fef434c
+			fabric-permission-api-v1: Fabric Permission API (v1) 1.0.0+f3e738be4c
+			fabric-recipe-api-v1: Fabric Recipe API (v1) 9.0.15+be4b75ae4c
+			fabric-registry-sync-v0: Fabric Registry Sync (v0) 7.0.13+b61fef434c
+			fabric-renderer-api-v1: Fabric Renderer API (v1) 13.0.4+c80601bb4c
+			fabric-renderer-indigo: Fabric Renderer - Indigo 8.1.1+1403e82c4c
+			fabric-rendering-fluids-v1: Fabric Rendering Fluids (v1) 6.0.1+d871b99e4c
+			fabric-rendering-v1: Fabric Rendering (v1) 23.1.1+1403e82c4c
+			fabric-resource-conditions-api-v1: Fabric Resource Conditions API (v1) 6.0.5+00a1fba64c
+			fabric-resource-loader-v0: Fabric Resource Loader (v0) 3.3.17+4fc5413f4c
+			fabric-resource-loader-v1: Fabric Resource Loader (v1) 2.0.10+7c44c7324c
+			fabric-screen-api-v1: Fabric Screen API (v1) 5.0.1+d871b99e4c
+			fabric-serialization-api-v1: Fabric Serialization API (v1) 2.0.3+11a26f314c
+			fabric-sound-api-v1: Fabric Sound API (v1) 2.0.4+11a26f314c
+			fabric-tag-api-v1: Fabric Tag API (v1) 2.1.1+371cf5db4c
+			fabric-transfer-api-v1: Fabric Transfer API (v1) 8.0.5+357ea7334c
+			fabric-transitive-access-wideners-v1: Fabric Transitive Access Wideners (v1) 8.1.1+7f80f93d4c
+		fabric-language-kotlin: Fabric Language Kotlin 1.13.11+kotlin.2.3.21
+			org_jetbrains_kotlin_kotlin-reflect: kotlin-reflect 2.3.21
+			org_jetbrains_kotlin_kotlin-stdlib: kotlin-stdlib 2.3.21
+			org_jetbrains_kotlin_kotlin-stdlib-jdk7: kotlin-stdlib-jdk7 2.3.21
+			org_jetbrains_kotlin_kotlin-stdlib-jdk8: kotlin-stdlib-jdk8 2.3.21
+			org_jetbrains_kotlinx_atomicfu-jvm: atomicfu-jvm 0.32.1
+			org_jetbrains_kotlinx_kotlinx-coroutines-core-jvm: kotlinx-coroutines-core-jvm 1.10.2
+			org_jetbrains_kotlinx_kotlinx-coroutines-jdk8: kotlinx-coroutines-jdk8 1.10.2
+			org_jetbrains_kotlinx_kotlinx-datetime-jvm: kotlinx-datetime-jvm 0.7.1
+			org_jetbrains_kotlinx_kotlinx-io-bytestring-jvm: kotlinx-io-bytestring-jvm 0.9.0
+			org_jetbrains_kotlinx_kotlinx-io-core-jvm: kotlinx-io-core-jvm 0.9.0
+			org_jetbrains_kotlinx_kotlinx-serialization-cbor-jvm: kotlinx-serialization-cbor-jvm 1.11.0
+			org_jetbrains_kotlinx_kotlinx-serialization-core-jvm: kotlinx-serialization-core-jvm 1.11.0
+			org_jetbrains_kotlinx_kotlinx-serialization-json-jvm: kotlinx-serialization-json-jvm 1.11.0
+		fabricloader: Fabric Loader 0.19.2
+			mixinextras: MixinExtras 0.5.4
+		fabrishot: Fabrishot 1.17.0
+		fastquit: FastQuit 3.1.4+mc26.1.x
+		ferritecore: FerriteCore 9.0.0
+		forgeconfigapiport: Forge Config API Port 26.1.4
+			com_electronwill_night-config_core: core 3.8.3
+			com_electronwill_night-config_toml: toml 3.8.3
+		immediatelyfast: ImmediatelyFast 1.15.2+26.1.2
+			net_lenni0451_reflect: Reflect 1.6.2
+		iris: Iris 1.10.9+mc26.1.1
+			io_github_douira_glsl-transformer: glsl-transformer 3.0.0-pre3
+			org_anarres_jcpp: jcpp 1.4.14
+			org_antlr_antlr4-runtime: antlr4-runtime 4.13.1
+		isxander-main-menu-credits: Main Menu Credits 1.3.0
+		ixeris: Ixeris 4.3.0+26.1.2-fabric
+		java: Java HotSpot(TM) 64-Bit Server VM 25
+		lambdynlights: LambDynamicLights 4.10.2+26.1.2
+			lambdynlights_api: LambDynamicLights (API) 4.10.2+26.1.2
+			pride: Pride Lib 1.6.0+26.1
+			spruceui: SpruceUI 10.0.0+26.1
+			yumi_mc_core: Yumi Minecraft Libraries: Foundation 1.0.0+26.1
+				yumi_commons_collections: Yumi Commons: Collections 2.0.0
+				yumi_commons_core: Yumi Commons: Core 2.0.0
+				yumi_commons_event: Yumi Commons: Event 2.0.0
+		languagereload: Language Reload 1.7.6+26.1
+		lithium: Lithium 0.24.2+mc26.1.2
+		malilib: MaLiLib 0.28.6
+			conditional-mixin: conditional mixin 0.6.4
+		malilib-api: MaLiLib API 0.8.2+26.1
+			net_kr1v_malilib-api-processor: malilib-api-processor 1.0.0
+		minecraft: Minecraft 26.1.2
+		modmenu: Mod Menu 18.0.0-beta.1
+			placeholder-api: Placeholder API 3.0.0+26.1
+		morechathistory: More Chat History 2.0.0
+		moreculling: More Culling 1.7.0
+			mixinsquared: MixinSquared 0.2.0
+		nochatreports: No Chat Reports 26.1-v2.19.0
+		optigui: OptiGUI 2.3.0-beta.10+26.1
+			org_apache_commons_commons-text: commons-text 1.12.0
+			org_ini4j_ini4j: ini4j 0.5.4
+		paginatedadvancements: Paginated Advancements 2.8.0+26.1
+		puzzle: Puzzle 2.3.1
+			midnightlib: MidnightLib 1.9.2
+		reeses-sodium-options: Reese's Sodium Options 2.0.5+mc26.1.1
+		rrls: Remove Reloading Screen 5.2.5+mc.26.1
+		skyboxify: Skyboxify 2.8
+			com_moulberry_mixinconstraints: mixinconstraints 1.1.0
+		sodium: Sodium 0.8.12+mc26.1.2
+		sodium-extra: Sodium Extra 0.8.7+mc26.1.1
+		sspb: Sodium Shadowy Path Blocks 7.0.0
+		yet_another_config_lib_v3: YetAnotherConfigLib 3.9.3+26.1-fabric
+			com_twelvemonkeys_common_common-image: common-image 3.12.0
+			com_twelvemonkeys_common_common-io: common-io 3.12.0
+			com_twelvemonkeys_common_common-lang: common-lang 3.12.0
+			com_twelvemonkeys_imageio_imageio-core: imageio-core 3.12.0
+			com_twelvemonkeys_imageio_imageio-metadata: imageio-metadata 3.12.0
+			com_twelvemonkeys_imageio_imageio-webp: imageio-webp 3.12.0
+			org_quiltmc_parsers_gson: gson 0.2.1
+			org_quiltmc_parsers_json: json 0.2.1
+		zoomify: Zoomify 2.16.0+26.1
+	Loaded Shaderpack: (off)
+	Yumi MC Core: 1.0.0+26.1
+	Launched Version: 26.1.2
+	Backend library: LWJGL version 3.4.1-snapshot
+	Backend API: NVIDIA GeForce RTX 2060 SUPER/PCIe/SSE2 GL version 3.3.0 NVIDIA 591.86, NVIDIA Corporation
+	Window size: 854x480
+	GFLW Platform: win32
+	Render Extensions: GL_ARB_buffer_storage, GL_KHR_debug, GL_ARB_vertex_attrib_binding, GL_ARB_direct_state_access, GL_EXT_texture_filter_anisotropic
+	GL debug messages: 
+	Is Modded: Definitely; Client brand changed to 'fabric'; Server brand changed to 'fabric'
+	Universe: 400921fb54442d18
+	Type: Integrated Server
+	Transparency: regular
+	Render Distance: 8/8 chunks
+	Resource Packs: vanilla, advancedchatcore, advancedchathud, animatica, betterblockentities, bettergrass, bettermounthud, cape-provider, cloth-config, conditional-mixin, config_manager, continuity, controlify, cwb (incompatible), debugify, dynamic_fps, dynamic_fps_common, e4mc, entity_model_features (incompatible), entity_texture_features (incompatible), entityculling, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-language-kotlin, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, fabrishot, fastquit, forgeconfigapiport (incompatible), immediatelyfast, iris, lambdynlights, lambdynlights_api, languagereload, lithium, malilib, malilib-api, midnightlib, modmenu, morechathistory, moreculling, nochatreports, optigui, paginatedadvancements, placeholder-api, pride, puzzle, reeses-sodium-options, rrls, skyboxify, sodium, sodium-extra, spruceui, sspb, trender, yet_another_config_lib_v3 (incompatible), zoomify, file/SodiumTranslations.zip, file/Chat Reporting Helper.zip, file/Mod Menu Helper.zip, continuity:glass_pane_culling_fix, continuity:default
+	Sound Cache: 170710 bytes in 1 buffers
+	Current Language: en_us
+	Locale: en_US
+	System encoding: Cp1252
+	File encoding: UTF-8
+	CPU: 20x 12th Gen Intel(R) Core(TM) i7-12700
+	Server Running: true
+	Player Count: 1 / 8; [ServerPlayer['test1'/50, l='ServerLevel[New World]', x=-13.41, y=65.00, z=4.53]]
+	Active Data Packs: vanilla, fabric-convention-tags-v2
+	Available Data Packs: fabric-convention-tags-v2, minecart_improvements, redstone_experiments, trade_rebalance, vanilla
+	Enabled Feature Flags: minecraft:vanilla
+	World Generation: Stable
+	World Seed: -5335595985707749014
+	Suppressed Exceptions: ~~NONE~~
