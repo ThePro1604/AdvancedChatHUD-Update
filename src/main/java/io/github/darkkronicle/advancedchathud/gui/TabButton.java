@@ -17,6 +17,7 @@ import io.github.darkkronicle.advancedchathud.AdvancedChatHud;
 import io.github.darkkronicle.advancedchathud.config.HudConfigStorage;
 import io.github.darkkronicle.advancedchathud.itf.IChatHud;
 import io.github.darkkronicle.advancedchathud.tabs.AbstractChatTab;
+import fi.dy.masa.malilib.render.GuiContext;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -37,7 +38,9 @@ public class TabButton extends CleanButton {
         this.tab = tab;
     }
 
-    public void render(GuiGraphicsExtractor drawContext, int mouseX, int mouseY, boolean selected) {
+    @Override
+    public void render(GuiContext context, int mouseX, int mouseY, boolean selected) {
+        GuiGraphicsExtractor drawContext = (GuiGraphicsExtractor)(Object) context.getGuiGraphics();
         int relMX = mouseX - x;
         int relMY = mouseY - y;
         hovered = relMX >= 0 && relMX <= width && relMY >= 0 && relMY <= height;

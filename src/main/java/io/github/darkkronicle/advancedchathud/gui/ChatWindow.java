@@ -418,6 +418,33 @@ public class ChatWindow {
             }
         }
 
+        // Show unread indicator in HUD mode (chat not open) when there are unread messages
+        if (!focused && tab.isShowUnread() && tab.getUnread() > 0 && !isMinimalist()) {
+            int scaledBar = getBarHeight();
+            int newY = getScaledHeight() + scaledBar;
+            int barY = getActualY(newY);
+            String label = tab.getAbbreviation();
+            int labelWidth = StringUtils.getStringWidth(label) + 8;
+            String unreadStr = io.github.darkkronicle.advancedchatcore.util.TextUtil.toSuperscript(Math.min(tab.getUnread(), 99));
+            int unreadWidth = client.font.width(unreadStr) + 6;
+            int totalWidth = labelWidth + unreadWidth;
+            int textY = barY + (scaledBar - client.font.lineHeight) / 2;
+
+            // Tab label background
+            drawRect(drawContext, leftX, barY, labelWidth, scaledBar, tab.getMainColor().color());
+            drawOutline(drawContext, leftX, barY, labelWidth, scaledBar, tab.getBorderColor().color());
+            drawContext.centeredText(client.font, label, leftX + labelWidth / 2, textY,
+                    Colors.getInstance().getColorOrWhite("white").color());
+
+            // Unread count badge in red
+            drawRect(drawContext, leftX + labelWidth, barY, unreadWidth, scaledBar,
+                    tab.getMainColor().color());
+            drawOutline(drawContext, leftX + labelWidth, barY, unreadWidth, scaledBar,
+                    tab.getBorderColor().color());
+            drawContext.centeredText(client.font, unreadStr, leftX + labelWidth + unreadWidth / 2,
+                    textY, 0xFFFF5555);
+        }
+
         if (focused && !isMinimalist()) {
             drawOutline(
                     drawContext,

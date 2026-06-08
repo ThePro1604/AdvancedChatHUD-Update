@@ -102,7 +102,7 @@ public class ChatTab {
             SaveableConfig.fromConfig(
                     "showUnread",
                     new ConfigBoolean(
-                            translate("showunread"), false, translate("info.showunread")));
+                            translate("showunread"), true, translate("info.showunread")));
 
     private final ImmutableList<SaveableConfig<?>> options =
             ImmutableList.of(

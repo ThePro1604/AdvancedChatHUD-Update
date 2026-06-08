@@ -22,8 +22,8 @@ import io.github.darkkronicle.advancedchatcore.util.TextUtil;
 import io.github.darkkronicle.advancedchathud.config.Match;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import fi.dy.masa.malilib.render.GuiContext;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -150,7 +150,10 @@ public class WidgetMatchEntry extends WidgetConfigListEntry<Match> {
         return texts;
     }
 
-    public void renderEntry(int mouseX, int mouseY, boolean selected, GuiGraphicsExtractor drawContext) {}
+    @Override
+    public void renderEntry(GuiContext context, int mouseX, int mouseY, boolean selected) {
+        // Text fields are rendered via drawTextFields() in the parent render() method
+    }
 
     @Override
     public String getName() {
