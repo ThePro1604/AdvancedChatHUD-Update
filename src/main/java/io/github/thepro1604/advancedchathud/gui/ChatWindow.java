@@ -154,7 +154,7 @@ public class ChatWindow {
         if (force || message.getTabs().contains(tab)) {
             ChatMessage newMessage = message.getMessage().shallowClone(getPaddedWidth());
             if (setTicks) {
-                newMessage.setCreationTick(Minecraft.getInstance().gui.getGuiTicks());
+                newMessage.setCreationTick(Minecraft.getInstance().gui.hud.getGuiTicks());
             }
             this.lines.add(0, newMessage);
             if (scrolledHeight > 0) {

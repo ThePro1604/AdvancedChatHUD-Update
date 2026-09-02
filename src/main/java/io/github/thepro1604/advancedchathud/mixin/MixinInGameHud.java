@@ -11,14 +11,16 @@ import io.github.thepro1604.advancedchathud.gui.WindowManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.DeltaTracker;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Gui.class)
+// Gui.extractRenderState no longer takes a GuiGraphicsExtractor in 26.2 (it now delegates
+// the actual overlay drawing to Hud.extractRenderState), so inject there instead.
+@Mixin(Hud.class)
 @Environment(EnvType.CLIENT)
 public class MixinInGameHud {
 

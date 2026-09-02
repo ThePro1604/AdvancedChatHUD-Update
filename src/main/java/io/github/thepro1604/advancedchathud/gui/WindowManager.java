@@ -106,8 +106,8 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
 
     public void onRenderGameOverlayPost(GuiGraphicsExtractor drawContext, Minecraft mc, float partialTicks) {
         boolean isFocused = isChatFocused();
-        int ticks = client.gui.getGuiTicks();
-        if (!HudConfigStorage.General.RENDER_IN_OTHER_GUI.config.getBooleanValue() && !isFocused && client.screen != null) {
+        int ticks = client.gui.hud.getGuiTicks();
+        if (!HudConfigStorage.General.RENDER_IN_OTHER_GUI.config.getBooleanValue() && !isFocused && client.gui.screen() != null) {
             return;
         }
         for (int i = windows.size() - 1; i >= 0; i--) {
@@ -124,9 +124,9 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
     }
 
     private void renderHoverTooltip(GuiGraphicsExtractor drawContext) {
-        if (client.screen != null) {
+        if (client.gui.screen() != null) {
             // Don't render tooltips when a screen is open (unless it's the chat screen)
-            if (!(client.screen instanceof io.github.thepro1604.advancedchatcore.chat.AdvancedChatScreen)) {
+            if (!(client.gui.screen() instanceof io.github.thepro1604.advancedchatcore.chat.AdvancedChatScreen)) {
                 return;
             }
         }
@@ -254,7 +254,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
     }
 
     public boolean isChatFocused() {
-        return this.client.screen instanceof AdvancedChatScreen;
+        return this.client.gui.screen() instanceof AdvancedChatScreen;
     }
 
     public ChatWindow getSelected() {
@@ -279,7 +279,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
         windows.removeIf(w -> w == window);
         windows.add(0, window);
 
-        if (!HudConfigStorage.General.CHANGE_START_MESSAGE.config.getBooleanValue() || !(client.screen instanceof AdvancedChatScreen screen)) {
+        if (!HudConfigStorage.General.CHANGE_START_MESSAGE.config.getBooleanValue() || !(client.gui.screen() instanceof AdvancedChatScreen screen)) {
             return;
         }
         if (window.getTab() instanceof MainChatTab) {
@@ -502,7 +502,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                 client.player.connection.sendCommand(command);
             }
             if (screen instanceof AdvancedChatScreen) {
-                client.setScreen(null);
+                client.setScreenAndShow(null);
             }
             return true;
         } else if (event instanceof net.minecraft.network.chat.ClickEvent.OpenUrl openUrl) {
@@ -536,7 +536,7 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
             if (screen instanceof AdvancedChatScreen chatScreen) {
                 chatScreen.getChatField().setValue(suggest.command());
             } else {
-                client.setScreen(new AdvancedChatScreen(suggest.command()));
+                client.setScreenAndShow(new AdvancedChatScreen(suggest.command()));
             }
             return true;
         } else if (event instanceof net.minecraft.network.chat.ClickEvent.CopyToClipboard copy) {

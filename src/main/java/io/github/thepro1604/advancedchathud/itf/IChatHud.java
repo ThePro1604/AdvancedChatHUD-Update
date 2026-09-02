@@ -28,7 +28,7 @@ public interface IChatHud {
     boolean isOver(double mouseX, double mouseY);
 
     static IChatHud getInstance() {
-        return (IChatHud) Minecraft.getInstance().gui.getChat();
+        return (IChatHud) Minecraft.getInstance().gui.hud.getChat();
     }
 
     void removeMessage(ChatMessage remove);
