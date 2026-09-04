@@ -1,0 +1,202 @@
+---- Minecraft Crash Report ----
+// Don't do that.
+
+Time: 2026-09-02 17:52:51
+Description: Initializing game
+
+java.lang.RuntimeException: Mixin transformation of net.minecraft.client.gui.Gui failed
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:440)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.tryLoadClass(KnotClassDelegate.java:336)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.loadClass(KnotClassDelegate.java:231)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassLoader.loadClass(KnotClassLoader.java:119)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:490)
+	at knot//net.minecraft.client.Minecraft.<init>(Minecraft.java:684)
+	at knot//net.minecraft.client.main.Main.main(Main.java:278)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at org.prismlauncher.launcher.impl.StandardLauncher.launch(StandardLauncher.java:115)
+	at org.prismlauncher.EntryPoint.listen(EntryPoint.java:129)
+	at org.prismlauncher.EntryPoint.main(EntryPoint.java:70)
+Caused by: org.spongepowered.asm.mixin.transformer.throwables.MixinTransformerError: An unexpected critical error was encountered
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:380)
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClass(MixinTransformer.java:237)
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClassBytes(MixinTransformer.java:202)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:435)
+	... 12 more
+Caused by: org.spongepowered.asm.mixin.throwables.MixinApplyError: Mixin [advancedchathud.mixins.json:MixinInGameHud from mod advancedchathud] from phase [DEFAULT] in config [advancedchathud.mixins.json] FAILED during APPLY
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.handleMixinError(MixinProcessor.java:685)
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.handleMixinApplyError(MixinProcessor.java:636)
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:367)
+	... 15 more
+Caused by: org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException: Invalid descriptor on advancedchathud.mixins.json:MixinInGameHud from mod advancedchathud->@Inject::onRenderHud(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V! Expected (Lnet/minecraft/client/DeltaTracker;ZZLorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V but found (Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V [INJECT_APPLY Applicator Phase -> advancedchathud.mixins.json:MixinInGameHud from mod advancedchathud -> Apply Injections ->  -> Inject -> advancedchathud.mixins.json:MixinInGameHud from mod advancedchathud->@Inject::onRenderHud(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V]
+	at org.spongepowered.asm.mixin.injection.callback.CallbackInjector.inject(CallbackInjector.java:563)
+	at org.spongepowered.asm.mixin.injection.callback.CallbackInjector.inject(CallbackInjector.java:493)
+	at org.spongepowered.asm.mixin.injection.code.Injector.inject(Injector.java:284)
+	at org.spongepowered.asm.mixin.injection.struct.InjectionInfo.inject(InjectionInfo.java:503)
+	at org.spongepowered.asm.mixin.transformer.MixinTargetContext.applyInjections(MixinTargetContext.java:1470)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.applyInjections(MixinApplicatorStandard.java:832)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.lambda$runApplicatorPass$7(MixinApplicatorStandard.java:362)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.processMixins(MixinApplicatorStandard.java:381)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.runApplicatorPass(MixinApplicatorStandard.java:360)
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.apply(MixinApplicatorStandard.java:240)
+	at org.spongepowered.asm.mixin.transformer.TargetClassContext.apply(TargetClassContext.java:437)
+	at org.spongepowered.asm.mixin.transformer.TargetClassContext.applyMixins(TargetClassContext.java:418)
+	at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:351)
+	... 15 more
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Render thread
+Stacktrace:
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.getPostMixinClassByteArray(KnotClassDelegate.java:440)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.tryLoadClass(KnotClassDelegate.java:336)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassDelegate.loadClass(KnotClassDelegate.java:231)
+	at net.fabricmc.loader.impl.launch.knot.KnotClassLoader.loadClass(KnotClassLoader.java:119)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:490)
+	at knot//net.minecraft.client.Minecraft.<init>(Minecraft.java:684)
+
+-- Initialization --
+Details:
+	Modules: 
+Stacktrace:
+	at knot//net.minecraft.client.main.Main.main(Main.java:278)
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:517)
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:72)
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23)
+	at org.prismlauncher.launcher.impl.StandardLauncher.launch(StandardLauncher.java:115)
+	at org.prismlauncher.EntryPoint.listen(EntryPoint.java:129)
+	at org.prismlauncher.EntryPoint.main(EntryPoint.java:70)
+
+-- System Details --
+Details:
+	Minecraft Version: 26.2
+	Minecraft Version ID: 26.2
+	Operating System: Linux (amd64) version 7.1.10-200.fc44.x86_64
+	Java Version: 25.0.1, Microsoft
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode), Microsoft
+	Memory: 173979472 bytes (165 MiB) / 536870912 bytes (512 MiB) up to 4294967296 bytes (4096 MiB)
+	Memory (heap): init: 512MiB, used: 345MiB, committed: 512MiB, max: 4096MiB
+	Memory (non-head): init: 007MiB, used: 150MiB, committed: 152MiB, max: 000MiB
+	CPUs: 16
+	Processor Vendor: GenuineIntel
+	Processor Name: 12th Gen Intel(R) Core(TM) i7-12700
+	Identifier: Intel64 Family 6 Model 151 Stepping 2
+	Microarchitecture: Alder Lake
+	Frequency (GHz): -0.00
+	Number of physical packages: 1
+	Number of physical CPUs: 12
+	Number of logical CPUs: 20
+	Graphics card #0 name: GB205 [GeForce RTX 5070]
+	Graphics card #0 vendor: NVIDIA Corporation (0x10de)
+	Graphics card #0 VRAM (MiB): 288.00
+	Graphics card #0 deviceId: 0x2f04
+	Graphics card #0 versionInfo: unknown
+	Graphics card #1 name: TU106 [GeForce RTX 2060 SUPER]
+	Graphics card #1 vendor: NVIDIA Corporation (0x10de)
+	Graphics card #1 VRAM (MiB): 288.00
+	Graphics card #1 deviceId: 0x1f06
+	Graphics card #1 versionInfo: unknown
+	Virtual memory max (MiB): 56369.31
+	Virtual memory used (MiB): 33064.54
+	Swap memory total (MiB): 8192.00
+	Swap memory used (MiB): 0.00
+	Space in storage for jna.tmpdir (MiB): <path not set>
+	Space in storage for org.lwjgl.system.SharedLibraryExtractPath (MiB): <path not set>
+	Space in storage for io.netty.native.workdir (MiB): <path not set>
+	Space in storage for java.io.tmpdir (MiB): available: 9149.74, total: 9635.46
+	Space in storage for workdir (MiB): available: 877517.44, total: 951220.00
+	Operating System Version: GNU/Linux KDE Flatpak runtime 6.10 (unknown) build 7.1.10-200.fc44.x86_64
+	Process Elevated: false
+	Process Loads: Uptime: 7s, user: 23s (313.60%), kernel: 1s (13.48%), total: 24s (327.08%)
+	Process Virtual Size (MiB): 9684.07
+	Process Resident Size (MiB): 982.20
+	JVM Flags: 2 total; -Xms512m -Xmx4096m
+	Debug Flags: 0 total; 
+	Fabric Mods: 
+		advancedchatcore: AdvancedChatCore 26.2-2.3
+			com_electronwill_night-config_core: core 3.6.5
+			com_electronwill_night-config_toml: toml 3.6.5
+			com_github_darkkronicle_konstruct_addons: addons 2.0.3-build1
+			com_github_darkkronicle_konstruct_core: core 2.0.3-build1
+			io_github_maowimpl_owo: owo 2.0.0
+			org_apache_commons_commons-csv: commons-csv 1.8
+			org_mariuszgromada_math_mathparser_org-mxparser: MathParser.org-mXparser 4.4.2
+		advancedchatfilters: AdvancedChatFilters 26.2-2.3
+		advancedchathud: AdvancedChatHUD 26.2-2.4
+		fabric-api: Fabric API 0.159.0+26.2
+			fabric-api-lookup-api-v1: Fabric API Lookup API (v1) 2.0.18+11e1c9a39e
+			fabric-biome-api-v1: Fabric Biome API (v1) 18.0.6+c7bd5b8e9e
+			fabric-block-api-v1: Fabric Block API (v1) 3.0.3+ec56b6019e
+			fabric-block-getter-api-v2: Fabric BlockGetter API (v2) 2.0.7+ec56b6019e
+			fabric-command-api-v2: Fabric Command API (v2) 3.1.0+00cb03469e
+			fabric-content-registries-v0: Fabric Content Registries (v0) 11.3.2+37b1aa249e
+			fabric-convention-tags-v2: Fabric Convention Tags (v2) 4.7.1+1f023a9e9e
+			fabric-crash-report-info-v1: Fabric Crash Report Info (v1) 1.0.5+086d547a9e
+			fabric-creative-tab-api-v1: Fabric Creative Tab API (v1) 5.0.14+d871b99e9e
+			fabric-data-attachment-api-v1: Fabric Data Attachment API (v1) 2.2.18+515ac5339e
+			fabric-data-generation-api-v1: Fabric Data Generation API (v1) 25.5.1+aed122aa9e
+			fabric-debug-api-v1: Fabric Debug API (v1) 1.0.2+c792624d9e
+			fabric-dimensions-v1: Fabric Dimensions API (v1) 5.1.12+515ac5339e
+			fabric-entity-events-v1: Fabric Entity Events (v1) 5.0.5+06488ac19e
+			fabric-events-interaction-v0: Fabric Events Interaction (v0) 5.2.7+515ac5339e
+			fabric-game-rule-api-v1: Fabric Game Rule API (v1) 4.0.8+46a6d00c9e
+			fabric-item-api-v1: Fabric Item API (v1) 14.5.0+c68f6cbe9e
+			fabric-key-mapping-api-v1: Fabric Key Mapping API (v1) 2.0.5+e2bdee789e
+			fabric-lifecycle-events-v1: Fabric Lifecycle Events (v1) 4.1.4+29b6eb019e
+			fabric-loot-api-v3: Fabric Loot API (v3) 3.0.17+06488ac19e
+			fabric-menu-api-v1: Fabric Menu API (v1) 2.0.16+086d547a9e
+			fabric-message-api-v1: Fabric Message API (v1) 7.0.8+bb2ed3f79e
+			fabric-model-loading-api-v1: Fabric Model Loading API (v1) 8.0.17+c80601bb9e
+			fabric-networking-api-v1: Fabric Networking API (v1) 6.3.3+72073ef09e
+			fabric-object-builder-api-v1: Fabric Object Builder API (v1) 24.1.0+6fcd5f039e
+			fabric-particles-v1: Fabric Particles (v1) 5.0.18+d1756aa99e
+			fabric-permission-api-v1: Fabric Permission API (v1) 1.0.5+e442d8d09e
+			fabric-recipe-api-v1: Fabric Recipe API (v1) 9.0.21+11e1c9a39e
+			fabric-registry-sync-v0: Fabric Registry Sync (v0) 7.1.0+c7bd5b8e9e
+			fabric-renderer-api-v1: Fabric Renderer API (v1) 14.1.4+2b0d8a229e
+			fabric-renderer-indigo: Fabric Renderer - Indigo 9.1.4+2b0d8a229e
+			fabric-rendering-fluids-v1: Fabric Rendering Fluids (v1) 6.0.4+06488ac19e
+			fabric-rendering-v1: Fabric Rendering (v1) 25.3.3+515ac5339e
+			fabric-resource-conditions-api-v1: Fabric Resource Conditions API (v1) 6.1.0+10e9a28b9e
+			fabric-resource-loader-v0: Fabric Resource Loader (v0) 3.3.20+4fc5413f9e
+			fabric-resource-loader-v1: Fabric Resource Loader (v1) 2.0.13+9edec1269e
+			fabric-screen-api-v1: Fabric Screen API (v1) 5.2.1+5087f8249e
+			fabric-serialization-api-v1: Fabric Serialization API (v1) 2.0.4+11a26f319e
+			fabric-sound-api-v1: Fabric Sound API (v1) 2.0.5+11a26f319e
+			fabric-tag-api-v1: Fabric Tag API (v1) 2.1.4+515ac5339e
+			fabric-transfer-api-v1: Fabric Transfer API (v1) 8.0.13+11dbb7d79e
+			fabric-transitive-access-wideners-v1: Fabric Transitive Access Wideners (v1) 8.1.4+67c847259e
+		fabricloader: Fabric Loader 0.19.5
+			mixinextras: MixinExtras 0.5.5
+		java: OpenJDK 64-Bit Server VM 25
+		malilib: MaLiLib 0.29.5
+			conditional-mixin: conditional mixin 0.6.4
+			fabric-api-base: Fabric API Base 2.0.4+ece063239e
+		malilib-api: MaLiLib API 0.8.3+26.2
+			net_kr1v_malilib-api-processor: malilib-api-processor 1.0.0
+		minecraft: Minecraft 26.2
+	Launched Version: 26.2
+	Launcher name: PrismLauncher
+	Backend library: LWJGL version 3.4.1-snapshot
+	Window size: <not initialized>
+	Surface Info: <no surface>
+	GFLW Platform: x11
+	Graphics Device: NVIDIA GeForce RTX 5070/PCIe/SSE2
+	Graphics Backend: OpenGL
+	Graphics Vendor: NVIDIA Corporation
+	Graphics Drivers: 3.3.0 NVIDIA 610.57.04
+	Graphics Device Extensions: GL_ARB_multi_draw_indirect, GL_ARB_buffer_storage, GL_ARB_shader_draw_parameters, GL_ARB_base_instance, GL_KHR_debug, GL_ARB_draw_indirect, GL_ARB_clip_control, GL_ARB_vertex_attrib_binding, GL_ARB_direct_state_access, GL_EXT_texture_filter_anisotropic
+	Graphics Device Type: OTHER
+	Graphics Device Features: DeviceFeatures[shaderDrawParameters=true, multiDrawDirectInterleaved=false, multiDrawDirectSeparate=true, multiDrawIndirect=true, drawIndirect=true, nonZeroFirstInstance=true, persistentMapping=true]
+	GL debug messages: 
+	Is Modded: Definitely; Client brand changed to 'fabric'
+	Universe: 404
+	Type: Client
+	Locale: en_US
+	System encoding: UTF-8
+	File encoding: UTF-8
+	CPU: 20x 12th Gen Intel(R) Core(TM) i7-12700

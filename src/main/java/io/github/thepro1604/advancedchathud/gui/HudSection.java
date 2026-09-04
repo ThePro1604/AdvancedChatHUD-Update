@@ -113,7 +113,8 @@ public class HudSection extends AdvancedChatScreenSection {
         }
     }
 
-    public void render(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
         if (menu != null) {
             // Render context menu directly - replicate ContextMenu's render logic using GuiGraphicsExtractor
             renderContextMenuDirect(context, menu, mouseX, mouseY);
