@@ -30,11 +30,11 @@
   "depends": {
     "fabricloader": ">=0.19.5",
     "fabric-api": "*",
-    "minecraft": ">=26.2",
-    "malilib": ">=0.29.0"
+    "minecraft": ">=26.3",
+    "malilib": ">=0.30.0"
   },
   "suggests": {
-    "advancedchatcore": ">=2.4"
+    "advancedchatcore": ">=2.7"
   },
   "custom": {
     "acmodule": true,

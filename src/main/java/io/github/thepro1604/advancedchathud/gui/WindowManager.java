@@ -517,20 +517,20 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
                         java.io.File screenshotFile = new java.io.File(
                                 new java.io.File(client.gameDirectory, "screenshots"), filename);
                         if (screenshotFile.exists()) {
-                            net.minecraft.util.Util.getPlatform().openFile(screenshotFile);
+                            com.mojang.blaze3d.Blaze3D.openPath(screenshotFile.toPath());
                             return true;
                         }
                     }
                 }
             }
             if ("file".equalsIgnoreCase(scheme)) {
-                net.minecraft.util.Util.getPlatform().openFile(new java.io.File(uri));
+                com.mojang.blaze3d.Blaze3D.openPath(java.nio.file.Path.of(uri));
                 return true;
             }
-            net.minecraft.util.Util.getPlatform().openUri(uri);
+            com.mojang.blaze3d.Blaze3D.openUri(uri);
             return true;
         } else if (event instanceof net.minecraft.network.chat.ClickEvent.OpenFile openFile) {
-            net.minecraft.util.Util.getPlatform().openFile(openFile.file());
+            com.mojang.blaze3d.Blaze3D.openPath(openFile.file().toPath());
             return true;
         } else if (event instanceof net.minecraft.network.chat.ClickEvent.SuggestCommand suggest) {
             if (screen instanceof AdvancedChatScreen chatScreen) {

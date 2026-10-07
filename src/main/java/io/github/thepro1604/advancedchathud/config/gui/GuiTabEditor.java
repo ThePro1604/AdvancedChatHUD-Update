@@ -7,6 +7,7 @@
  */
 package io.github.thepro1604.advancedchathud.config.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.google.common.collect.ImmutableList;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.gui.GuiBase;
@@ -15,7 +16,6 @@ import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.util.GuiUtils;
-import fi.dy.masa.malilib.util.KeyCodes;
 import fi.dy.masa.malilib.util.StringUtils;
 import io.github.thepro1604.advancedchatcore.config.SaveableConfig;
 import io.github.thepro1604.advancedchatcore.gui.buttons.BackButtonListener;
@@ -130,7 +130,7 @@ public class GuiTabEditor extends GuiConfigsBase implements IClosable {
             //     return true;
             // }
 
-            if (keyCode == KeyCodes.KEY_ESCAPE
+            if (keyCode == InputConstants.KEY_ESCAPE
                     && this.getParent() != GuiUtils.getCurrentScreen()) {
                 // Make sure to save
                 closeGui(true);

@@ -1,5 +1,6 @@
 package io.github.thepro1604.advancedchathud.config.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
 import fi.dy.masa.malilib.config.options.ConfigInteger;
@@ -7,7 +8,6 @@ import fi.dy.masa.malilib.gui.GuiConfigsBase;
 import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.util.GuiUtils;
-import fi.dy.masa.malilib.util.KeyCodes;
 import io.github.thepro1604.advancedchatcore.gui.buttons.BackButtonListener;
 import io.github.thepro1604.advancedchatcore.gui.buttons.Buttons;
 import io.github.thepro1604.advancedchatcore.interfaces.IClosable;
@@ -137,7 +137,7 @@ public class ChatWindowEditor extends GuiConfigsBase implements IClosable {
             //     return true;
             // }
 
-            if (keyCode == KeyCodes.KEY_ESCAPE
+            if (keyCode == InputConstants.KEY_ESCAPE
                     && this.getParent() != GuiUtils.getCurrentScreen()) {
                 // Make sure to save
                 closeGui(true);
