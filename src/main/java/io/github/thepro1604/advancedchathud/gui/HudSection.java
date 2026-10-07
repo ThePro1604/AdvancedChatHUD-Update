@@ -7,6 +7,7 @@
  */
 package io.github.thepro1604.advancedchathud.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import fi.dy.masa.malilib.config.options.ConfigColor;
 import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.util.InfoUtils;
@@ -233,7 +234,7 @@ public class HudSection extends AdvancedChatScreenSection {
 
         // Handle context menu clicks manually
         if (menu != null) {
-            if (button == 0) {
+            if (button == InputConstants.MOUSE_BUTTON_LEFT) {
                 // Left click - check if we clicked on a menu item
                 if (hoveredMenuEntry != null && menuOptions != null) {
                     ContextMenu.ContextConsumer action = menuOptions.get(hoveredMenuEntry);
@@ -253,7 +254,7 @@ public class HudSection extends AdvancedChatScreenSection {
             return true;
         }
 
-        if (button == 1) {
+        if (button == InputConstants.MOUSE_BUTTON_RIGHT) {
             createContextMenu((int) mouseX, (int) mouseY);
             return true;
         }

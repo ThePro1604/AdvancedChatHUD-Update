@@ -34,7 +34,7 @@
     "malilib": ">=0.30.0"
   },
   "suggests": {
-    "advancedchatcore": ">=2.7"
+    "advancedchatcore": ">=2.8"
   },
   "custom": {
     "acmodule": true,
