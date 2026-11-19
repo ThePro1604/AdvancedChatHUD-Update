@@ -17,7 +17,6 @@ import io.github.darkkronicle.Konstruct.parser.ParseContext;
 import io.github.darkkronicle.Konstruct.parser.Result;
 import io.github.darkkronicle.Konstruct.type.BooleanObject;
 import io.github.thepro1604.advancedchatcore.util.Color;
-import io.github.thepro1604.advancedchatcore.util.SearchUtils;
 import io.github.thepro1604.advancedchathud.AdvancedChatHud;
 import io.github.thepro1604.advancedchathud.config.ChatTab;
 import io.github.thepro1604.advancedchathud.config.Match;
@@ -77,7 +76,7 @@ public class CustomChatTab extends AbstractChatTab {
                 CustomChatTab self = ((ChatTabObject) Function.parseArgument(context, input, 0).getContent()).getTab();
                 String search = Function.parseArgument(context, input, 1).getContent().getString();
                 for (Match m : self.matches) {
-                    if (SearchUtils.isMatch(search, m.getPattern(), m.getFindType())) {
+                    if (m.isMatch(search)) {
                         return Result.success(new BooleanObject(true));
                     }
                 }

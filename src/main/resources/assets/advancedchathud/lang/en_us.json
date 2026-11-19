@@ -112,7 +112,7 @@
   "advancedchathud.config.tab.findstring": "Find String",
   "advancedchathud.config.tab.info.findstring": "The string that will be §6searached§r and §6diverted to this tab§r",
   "advancedchathud.config.tab.findtype": "Find Type",
-  "advancedchathud.config.tab.info.findtype": "How matches will be found\n§6Literal §r- Matches §6exactly §rthe string\n§eUpper-Lower §r- Like §6Literal, §rbut not §6case-sensitive\n§bRegEx §r - Parses the string as a §6regular expression\n§dAll §r- Passes §6all §rtext through to the tab, regardless of the string to find",
+  "advancedchathud.config.tab.info.findtype": "How matches will be found\n§6Literal §r- Matches §6exactly §rthe string\n§eUpper-Lower §r- Like §6Literal, §rbut not §6case-sensitive\n§7Use §6{ignore} §7in §6Literal §7or §eUpper-Lower §7to match any text in that spot\n§bRegEx §r - Parses the string as a §6regular expression\n§dAll §r- Passes §6all §rtext through to the tab, regardless of the string to find",
   "advancedchathud.config.tab.maincolor": "Accent Color",
   "advancedchathud.config.tab.info.maincolor": "The §6accent color§r of the §bchat tab§r",
   "advancedchathud.config.tab.bordercolor": "Border Color",

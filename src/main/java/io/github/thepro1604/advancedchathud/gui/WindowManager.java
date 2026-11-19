@@ -502,9 +502,6 @@ public class WindowManager implements IRenderer, ResolutionEventHandler {
             if (client.player != null && client.player.connection != null) {
                 client.player.connection.sendCommand(command);
             }
-            if (screen instanceof AdvancedChatScreen) {
-                client.setScreenAndShow(null);
-            }
             return true;
         } else if (event instanceof net.minecraft.network.chat.ClickEvent.OpenUrl openUrl) {
             java.net.URI uri = openUrl.uri();
